@@ -108,7 +108,7 @@ process aggregate {
   set splits, file(tsv) from A01
 
   output:
-  file '${prefix}.tsv' into A02
+  file "${prefix}.tsv" into A02
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
