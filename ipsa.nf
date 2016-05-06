@@ -9,6 +9,7 @@ params.merge = "all"
 params.mincount = 10
 params.smpid = 'labExpId'
 params.status = 0
+params.readLength = 75
 
 //print usage
 if (params.help) {
@@ -98,7 +99,7 @@ process sjcount {
   script:
   prefix = bam.name.replace(/.bam/,'')
   """
-  sjcount -bam ${bam} -ssc ${prefix}.A01.ssc.tsv -ssj ${prefix}.A01.ssj.tsv -nbins ${readLength} ${params.param} -quiet
+  sjcount -bam ${bam} -ssc ${prefix}.A01.ssc.tsv -ssj ${prefix}.A01.ssj.tsv -nbins ${params.readLength} ${params.param} -quiet
   """
 }
 
@@ -108,12 +109,11 @@ process aggregate {
 
   output:
   file '*.ssj.tsv' into ssjA02
-  file '*.ssc.tsv' into sscA02
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
-  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
+  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${params.readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
   """
 }
 
