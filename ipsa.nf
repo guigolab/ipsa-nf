@@ -40,6 +40,7 @@ if (params.help) {
   exit 1
 }
 
+log.info ""
 log.info "I P S A ~ Integrative Pipeline for Splicing Analyses"
 log.info ""
 log.info "General parameters"
@@ -59,6 +60,7 @@ log.info "Sjcount parameters                 : ${params.param}"
 log.info "BAM files repository               : ${params.repository}"
 log.info "Sample id field                    : ${params.smpid}"
 log.info "Annotation status lower threshold  : ${params.status}"
+log.info ""
 
 process genomeIndex {
   input:
