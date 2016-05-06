@@ -108,13 +108,20 @@ process aggregate {
   set splits, file(tsv) from A01
 
   output:
-  file '*.ssj.tsv' into ssjA02
+  file '${prefix}.tsv' into A02
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
   awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${params.readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
   """
+}
+
+ssjA02 = Channel.create()
+sscA02 = Channel.create()
+
+A02.choice( ssjA02,sscA02 ) { f ->
+    f.name =~ /ssj/ ? 0 : 1
 }
 
 process annotate {
@@ -173,14 +180,20 @@ process idr {
   file tsv from A04
 
   output:
-  file "*.ssj.tsv" into ssjA05
-  file "*.ssc.tsv" into sscA05
+  file "${prefix}.tsv" into A05
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A04/,'A05')
   """
   idr4sj.pl ${tsv} > ${prefix}.tsv
   """
+}
+
+ssjA05 = Channel.create()
+sscA05 = Channel.create()
+
+A05.choice( ssjA05,sscA05 ) { f ->
+    f.name =~ /ssj/ ? 0 : 1
 }
 
 process ssjA06 {
