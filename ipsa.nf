@@ -1,6 +1,6 @@
 // parameters
 params.deltaSS = 10
-params.dir = 'out'
+params.dir = 'E06'
 params.entropy = 1.5
 params.group = 'labExpId'
 params.idr = 0.1
@@ -255,6 +255,9 @@ process sscTsv2bed {
 }
 
 process tsv2gff {
+
+  publishDir params.dir
+
   input:
   file ssj from ssj4gffA06
 
@@ -267,5 +270,3 @@ process tsv2gff {
   tsv2gff.pl  < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
   """
 }
-
-E06.println()
