@@ -20,7 +20,7 @@ read_junctions($in);
 read_annotation($annot);
 index_ss();
 
-$program = $MAPTOOLSDIR."bin/getsegm2 -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
+$program = "getsegm2 -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
 %seq = split /[\t\n]/, `cat $in | $program -dbx $dbx -idx $idx`;
 #print STDERR "[cat $in | $program -dbx $dbx -idx $idx]\n";
 

@@ -20,7 +20,6 @@ sub parse_command_line {
     my %hash = @_;
     foreach $key(sort keys(%hash)) {
 	my %param = %{$hash{$key}};
-	($trash, $param{'default'}) = split /[=\n]/, `grep ^$key= makefile` if($param{'variable'});
 	$$key = $param{'default'} if($param{'default'} ne undef);
 	my $obligatory = $param{'ifunreadable'} || $param{'ifabsent'};
 	if(@ARGV==0 && !$param{'variable'}) {
