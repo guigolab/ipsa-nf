@@ -107,13 +107,13 @@ process aggregate {
   set splits, file(tsv) from A01
 
   output:
-  file "*.ssj.tsv" into ssjA02
-  file "*.ssc.tsv" into sscA02
+  file '*.ssj.tsv' into ssjA02
+  file '*.ssc.tsv' into sscA02
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
-  awk '$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
+  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
   """
 }
 
@@ -193,7 +193,7 @@ process ssjA06 {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
-  awk '$4>=1.5 && $5>=0 && $7<0.1'  ${ssj}  > ${prefix}.tsv
+  awk '\$4>=1.5 && \$5>=0 && \$7<0.1'  ${ssj}  > ${prefix}.tsv
   """
 }
 
@@ -207,7 +207,7 @@ process sscA06 {
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
-  awk '$4>=1.5 && $7<0.1'  ${ssc}  > ${prefix}.tsv
+  awk '\$4>=1.5 && \$7<0.1'  ${ssc}  > ${prefix}.tsv
   """
 }
 
