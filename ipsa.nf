@@ -69,7 +69,7 @@ process genomeIndex {
   script:
   prefix = genome.name.replace(/.fa/, '')
   """
-  transf -dir . -dbx ${prefix}.dbx -idx ${prefix}.idx
+  transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx
   """
 }
 
