@@ -12,8 +12,7 @@ parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'inp
 			dbx	=> {description=>'the genome (dbx)', ifunreadable=>'dbx not specified'},
                         idx     => {description=>'the genome (idx)', ifunreadable=>'idx not specified'},
 			deltaSS => {description=>'distance threshold for splice sites', default=>0},
-			logfile => {description=>'name of the log file'},
-			MAPTOOLSDIR  =>{variable=>T, ifabsent=>'MAPTOOLSDIR not specified'});
+			logfile => {description=>'name of the log file'});
 
 
 read_junctions($in);
