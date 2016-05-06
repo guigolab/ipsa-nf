@@ -61,7 +61,7 @@ log.info "Annotation status lower threshold  : ${params.status}"
 
 process genomeIndex {
   input:
-  file genome from params.genome
+  file genome from Channel.fromPath(params.genome)
 
   output:
   set file("${prefix}.dbx"), file("${prefix}.idx") into genomeIdx
@@ -75,7 +75,7 @@ process genomeIndex {
 
 process txElements {
   input:
-  file annotation from params.annot
+  file annotation from Channel.fromPath(params.annot)
 
   output:
   file "${prefix}.gfx" into txIdx
