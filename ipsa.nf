@@ -122,7 +122,7 @@ process aggregate {
 ssjA02 = Channel.create()
 sscA02 = Channel.create()
 
-A02.choice( ssjA02,sscA02 ) { f ->
+A02.choice( ssjA02, sscA02 ) { f ->
     f.name =~ /ssj/ ? 0 : 1
 }
 
@@ -262,6 +262,7 @@ process tsv2gff {
   file "${prefix}.gff" into E06
 
   script:
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
   tsv2gff.pl  < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
   """
