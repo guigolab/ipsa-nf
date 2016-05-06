@@ -248,7 +248,7 @@ process sscTsv2bed {
   file "${prefix}.bed" into E06
 
   script:
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
+  prefix = ssc.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
   tsv2bed.pl  < ${ssc} -extra 2 -ssc > ${prefix}.bed
   """
