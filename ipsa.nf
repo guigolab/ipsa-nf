@@ -147,7 +147,7 @@ process chooseStrand {
   file ssj from A03
 
   output:
-  file "${prefix}.tsv" into A04
+  file "${prefix}.tsv" into ssjA04, ssj4constrain
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A03/,'A04')
@@ -156,7 +156,7 @@ process chooseStrand {
   """
 }
 
-cA04 = A04.mix(sscA02).groupBy { f ->
+costrain = ssj4constrain.mix(sscA02).groupBy { f ->
    f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
 }.map { m ->
     m.values()
@@ -165,10 +165,10 @@ cA04 = A04.mix(sscA02).groupBy { f ->
 
 process constrainSSC {
   input:
-  set file(ssc), file(ssj) from cA04
+  set file(ssc), file(ssj) from constrain
 
   output:
-  file "${prefix}.tsv" into A04
+  file "${prefix}.tsv" into sscA04
 
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A02/,'A04')
@@ -176,6 +176,8 @@ process constrainSSC {
   constrain_ssc.pl -ssj ${ssj} < ${ssc}  > ${prefix}.tsv  
   """
 }
+
+A04 = ssjA04.mix(sscA04)
 
 process idr {
   input:
