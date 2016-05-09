@@ -156,7 +156,7 @@ process chooseStrand {
   """
 }
 
-costrain = ssj4constrain.mix(sscA02).groupBy { f ->
+constrain = ssj4constrain.mix(sscA02).groupBy { f ->
    f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
 }.map { m ->
     m.values()
