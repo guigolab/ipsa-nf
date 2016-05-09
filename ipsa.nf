@@ -62,7 +62,7 @@ log.info "Sample id field                    : ${params.smpid}"
 log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
 
-if (genome =~ /.fa$/) {
+if (params.genome =~ /.fa$/) {
   process genomeIndex {
     input:
     file genome from Channel.fromPath(params.genome)
