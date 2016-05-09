@@ -78,7 +78,7 @@ if (genome =~ /.fa$/) {
   }
 } else {
   genomeIdx = Channel.create()
-  genomeIdx << [file("${genome}.dbx"), file("${genome}.idx")]
+  genomeIdx << [file("${params.genome}.dbx"), file("${params.genome}.idx")]
 }
 
 process txElements {
