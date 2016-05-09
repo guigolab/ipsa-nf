@@ -133,7 +133,7 @@ A02.choice( ssjA02, sscA02 ) { f ->
 
 process annotate {
   input:
-  set genomeDBX, genomeIDX from genomeIdx.first()
+  set file(genomeDBX), file(genomeIDX) from genomeIdx.first()
   file annotation from txIdx.first()
   file ssj from ssjA02
 
