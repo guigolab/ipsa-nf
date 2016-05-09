@@ -157,7 +157,7 @@ process chooseStrand {
 }
 
 cA04 = A04.mix(sscA02).groupBy { f ->
-   f.baseName.replaceAll(/\.ss[cj]\.A0[24]/,'')
+   f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
 }.map { m ->
     m.values()
 }
