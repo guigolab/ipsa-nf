@@ -62,18 +62,23 @@ log.info "Sample id field                    : ${params.smpid}"
 log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
 
-process genomeIndex {
-  input:
-  file genome from Channel.fromPath(params.genome)
+if (genome =~ /.fa$/) {
+  process genomeIndex {
+    input:
+    file genome from Channel.fromPath(params.genome)
 
-  output:
-  set file("${prefix}.dbx"), file("${prefix}.idx") into genomeIdx
-  
-  script:
-  prefix = genome.name.replace(/.fa/, '')
-  """
-  transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx
-  """
+    output:
+    set file("${prefix}.dbx"), file("${prefix}.idx") into genomeIdx
+    
+    script:
+    prefix = genome.name.replace(/.fa/, '')
+    """
+    transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx
+    """
+  }
+} else {
+  genomeIdx = Channel.create()
+  genomeIdx << [file("${genome}.dbx"), file("${genome}.idx"))
 }
 
 process txElements {
