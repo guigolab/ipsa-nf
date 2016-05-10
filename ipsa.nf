@@ -96,8 +96,7 @@ if (params.annot =~ /.g[tf]f$/) {
     """
   }
 } else {
-  txIdx = Channel.create()
-  txIdx << file("${params.annot}")
+  txIdx = Channel.fromPath("${params.annot}")
   (txIdxAnnotate, txIdxZeta) = txIdx.into(2)
 }
 
