@@ -259,7 +259,7 @@ process zeta {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06\.ssh/,'A07')
   """
-  perl Perl/zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
+  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
   """
 }
 
