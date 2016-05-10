@@ -239,7 +239,7 @@ process sscA06 {
   """
 }
 
-allA06 = ssj4allA06.mix(ssc4allA06).groupBy { f ->
+allA06 = ssc4allA06.mix(ssj4allA06).groupBy { f ->
    f.baseName.replaceAll(/\.A06\.ss[cj]/,'')
 }.map { m ->
     m.values()
