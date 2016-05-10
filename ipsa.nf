@@ -81,18 +81,23 @@ if (params.genome =~ /.fa$/) {
   genomeIdx << [file("${params.genome}.dbx"), file("${params.genome}.idx")]
 }
 
-process txElements {
-  input:
-  file annotation from Channel.fromPath(params.annot)
+if (params.annot =~ /.g[tf]f$/) {
+  process txElements {
+    input:
+    file annotation from Channel.fromPath(params.annot)
 
-  output:
-  file "${prefix}.gfx" into txIdx
+    output:
+    file "${prefix}.gfx" into txIdx
 
-  script:
-  prefix = annotation.name.replace(/.gtf/,'')
-  """
-  transcript_elements.pl - < ${annotation} | sort -k1,1 -k4,5n > ${prefix}.gfx
-  """
+    script:
+    prefix = annotation.name.replace(/.gtf/,'')
+    """
+    transcript_elements.pl - < ${annotation} | sort -k1,1 -k4,5n > ${prefix}.gfx
+    """
+  }
+} else {
+  txIdx = Channel.create()
+  txIdx << file("${params.annot}")
 }
 
 process sjcount {
