@@ -140,7 +140,7 @@ A02.choice( ssjA02, sscA02 ) { f ->
 process annotate {
   input:
   set file(genomeDBX), file(genomeIDX) from genomeIdx.first()
-  file annotation from txIdx.first()
+  file annotation from txIdxAnnotate.first()
   file ssj from ssjA02
 
   output:
@@ -251,7 +251,7 @@ process zeta {
   publishDir params.dir
 
   input:
-  file annotation from txIdx.first()
+  file annotation from txIdxZeta.first()
   set file(ssc), file(ssj) from allA06
 
   output:
