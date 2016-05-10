@@ -1,6 +1,6 @@
 // parameters
 params.deltaSS = 10
-params.dir = 'E06'
+params.dir = 'A07'
 params.entropy = 1.5
 params.group = 'labExpId'
 params.idr = 0.1
@@ -215,7 +215,7 @@ process ssjA06 {
   file ssj from ssjA05
 
   output:
-  file "${prefix}.tsv" into ssjA06, ssj4gffA06
+  file "${prefix}.tsv" into ssjA06, ssj4gffA06, ssj4allA06
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
@@ -229,7 +229,7 @@ process sscA06 {
   file ssc from sscA05
 
   output:
-  file "${prefix}.tsv" into sscA06
+  file "${prefix}.tsv" into sscA06, ssc4allA06
 
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A05/,'A06')
@@ -237,6 +237,31 @@ process sscA06 {
   awk '\$4>=1.5 && \$7<0.1'  ${ssc}  > ${prefix}.tsv
   """
 }
+
+allA06 = ssj4allA06.mix(ssc4allA06).groupBy { f ->
+   f.baseName.replaceAll(/\.A06\.ss[cj]/,'')
+}.map { m ->
+    m.values()
+}
+.flatMap()
+
+process zeta {
+  
+  publishDir params.dir
+
+  input:
+  file annotation from txIdx.first()
+  set file(ssc), file(ssj) from allA06
+
+  output:
+
+  script:
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06\.ssh/,'A07')
+  """
+  perl Perl/zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
+  """
+}
+
 
 process ssjTsv2bed {
   input:
@@ -267,9 +292,6 @@ process sscTsv2bed {
 }
 
 process tsv2gff {
-
-  publishDir params.dir
-
   input:
   file ssj from ssj4gffA06
 
