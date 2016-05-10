@@ -258,7 +258,7 @@ process zeta {
   file "${prefix}.gff" into A07
 
   script:
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06\.ssh/,'A07')
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
   zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
   """
