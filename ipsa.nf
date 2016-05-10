@@ -87,7 +87,7 @@ if (params.annot =~ /.g[tf]f$/) {
     file annotation from Channel.fromPath(params.annot)
 
     output:
-    file "${prefix}.gfx" into txIdx
+    file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta
 
     script:
     prefix = annotation.name.replace(/.gtf/,'')
@@ -98,6 +98,7 @@ if (params.annot =~ /.g[tf]f$/) {
 } else {
   txIdx = Channel.create()
   txIdx << file("${params.annot}")
+  (txIdxAnnotate, txIdxZeta) = txIdx.into(2)
 }
 
 process sjcount {
