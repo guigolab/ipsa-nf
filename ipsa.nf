@@ -252,7 +252,7 @@ process zeta {
 
   input:
   file annotation from txIdxZeta.first()
-  set file(ssc), file(ssj) from allA06
+  set file(ssj), file(ssc) from allA06
 
   output:
   file "${prefix}.gff" into A07
