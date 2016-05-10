@@ -254,6 +254,7 @@ process zeta {
   set file(ssc), file(ssj) from allA06
 
   output:
+  file "${prefix}.gff" into A07
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06\.ssh/,'A07')
