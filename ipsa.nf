@@ -107,6 +107,7 @@ process sjcount {
   output:
   set val(1), file("${prefix}.A01.ssj.tsv") into A01
   set val(0), file("${prefix}.A01.ssc.tsv") into A01
+  set val(2), file("${prefix}.A01.ssj.tsv") into A01mex
 
   script:
   prefix = bam.name.replace(/.bam/,'')
@@ -126,6 +127,20 @@ process aggregate {
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
   awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${params.readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
+  """
+}
+
+process aggregateMex {
+  input:
+  set splits, file(tsv) from A01mex
+
+  output:
+  file "${prefix}.tsv" into D01
+
+  script:
+  prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
+  """
+  awk '\$2==${splits}' ${tsv} | agg.pl -logfile ${prefix}.log > ${prefix}.tsv 
   """
 }
 
@@ -157,7 +172,7 @@ process chooseStrand {
   file ssj from A03
 
   output:
-  file "${prefix}.tsv" into ssjA04, ssj4constrain
+  file "${prefix}.tsv" into ssjA04, ssj4constrain, ssj4constrainMult
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A03/,'A04')
@@ -168,6 +183,13 @@ process chooseStrand {
 
 constrain = ssj4constrain.mix(sscA02).groupBy { f ->
    f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
+}.map { m ->
+    m.values()
+}
+.flatMap()
+
+constrain = ssj4constrainMult.mix(D01).groupBy { f ->
+   f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
 }.map { m ->
     m.values()
 }
@@ -187,6 +209,34 @@ process constrainSSC {
   """
 }
 
+process constrainMex {
+  input:
+  set file(ssj), file(ssjMex) from constrainMult
+
+  output:
+  flle "${prefix}.tsv" into D02
+
+  script:
+  prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
+  """
+  constrain_mult.pl  -ssj ${ssj}.tsv < ${ssjMex}  > ${prefix}.tsv
+  """
+}
+
+process extractMex {
+  input:
+  file(ssjMex) from D02
+
+  output:
+  file "${prefix}.tsv" into D03
+
+  script:
+  prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
+  """
+  extract_mex.pl  < ${ssjMex}  > ${prefix}.tsv
+  """
+}
+
 A04 = ssjA04.mix(sscA04)
 
 process idr {
@@ -198,6 +248,20 @@ process idr {
 
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A04/,'A05')
+  """
+  idr4sj.pl ${tsv} > ${prefix}.tsv
+  """
+}
+
+process idrMex {
+  input:
+  file tsv from D03
+
+  output:
+  file "${prefix}.tsv" into D06
+
+  script:
+  prefix = tsv.name.replace(/.tsv/,'').replace(/D03/,'D06')
   """
   idr4sj.pl ${tsv} > ${prefix}.tsv
   """
@@ -238,8 +302,8 @@ process sscA06 {
   """
 }
 
-allA06 = ssj4allA06.mix(ssc4allA06).groupBy { f ->
-   f.baseName.replaceAll(/\.A06\.ss[cj]/,'')
+allA06 = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
+   f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
 }.map { m ->
     m.values()
 }
@@ -251,7 +315,7 @@ process zeta {
 
   input:
   file annotation from txIdxZeta.first()
-  set file(ssj), file(ssc) from allA06
+  set file(ssj), file(ssc), file(exons) from allA06
 
   output:
   file "${prefix}.gff" into A07
@@ -259,7 +323,7 @@ process zeta {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
-  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
+  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
   """
 }
 
