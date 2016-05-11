@@ -211,7 +211,7 @@ process constrainSSC {
 
 process constrainMex {
   input:
-  set file(ssj), file(ssjMex) from constrainMult
+  set file(ssjMex), file(ssj) from constrainMult
 
   output:
   flle "${prefix}.tsv" into D02
