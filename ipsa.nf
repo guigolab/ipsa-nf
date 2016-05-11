@@ -184,14 +184,14 @@ process chooseStrand {
 constrain = ssj4constrain.mix(sscA02).groupBy { f ->
    f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
 }.map { m ->
-    m.values()
+     m.values().collect { it.sort { it.baseName } }
 }
 .flatMap()
 
 constrainMult = ssj4constrainMult.mix(D01).groupBy { f ->
    f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
 }.map { m ->
-    m.values()
+    m.values().collect { it.sort { it.baseName } }
 }
 .flatMap()
 
@@ -211,7 +211,7 @@ process constrainSSC {
 
 process constrainMex {
   input:
-  set file(ssjMex), file(ssj) from constrainMult
+  set file(ssj), file(ssjMex) from constrainMult
 
   output:
   flle "${prefix}.tsv" into D02
@@ -305,7 +305,7 @@ process sscA06 {
 allA06 = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
    f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
 }.map { m ->
-    m.values()
+    m.values().collect { it.sort { it.baseName } }
 }
 .flatMap()
 
@@ -315,7 +315,7 @@ process zeta {
 
   input:
   file annotation from txIdxZeta.first()
-  set file(ssj), file(ssc), file(exons) from allA06
+  set file(ssc), file(ssj), file(exons) from allA06
 
   output:
   file "${prefix}.gff" into A07
