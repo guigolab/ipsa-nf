@@ -188,7 +188,7 @@ constrain = ssj4constrain.mix(sscA02).groupBy { f ->
 }
 .flatMap()
 
-constrain = ssj4constrainMult.mix(D01).groupBy { f ->
+constrainMult = ssj4constrainMult.mix(D01).groupBy { f ->
    f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
 }.map { m ->
     m.values()
