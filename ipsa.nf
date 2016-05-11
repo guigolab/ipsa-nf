@@ -311,16 +311,23 @@ process sscA06 {
   """
 }
 
-if ( ! params.microexons ) {
-  D06 = Channel.empty()
+if ( params.microexons ) {
+  allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
+     f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
+  }.map { m ->
+      m.values().collect { it.sort { it.baseName } }
+  }
+  .flatMap()
+  allA06 = Channel.empty()
+} else {
+  allA06 = ssj4allA06.mix(ssc4allA06).groupBy { f ->
+     f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
+  }.map { m ->
+      m.values().collect { it.sort { it.baseName } }
+  }
+  .flatMap()
+  allMex = Channel.empty()
 }
-
-allA06 = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
-   f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
-}.map { m ->
-    m.values().collect { it.sort { it.baseName } }
-}
-.flatMap()
 
 process zeta {
   
