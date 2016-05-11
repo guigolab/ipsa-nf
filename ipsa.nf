@@ -138,7 +138,7 @@ process aggregateMex {
   file "${prefix}.tsv" into D01
 
   script:
-  prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
+  prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'D01')
   """
   awk '\$2==${splits}' ${tsv} | agg.pl -logfile ${prefix}.log > ${prefix}.tsv 
   """
