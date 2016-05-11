@@ -205,7 +205,7 @@ process constrainSSC {
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A02/,'A04')
   """
-  constrain_ssc.pl -ssj ${ssj} < ${ssc}  > ${prefix}.tsv  
+  constrain_ssc.pl -ssj ${ssj} < ${ssc} > ${prefix}.tsv  
   """
 }
 
@@ -219,13 +219,13 @@ process constrainMex {
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
   """
-  constrain_mult.pl  -ssj ${ssj} < ${ssjMex}  > ${prefix}.tsv
+  constrain_mult.pl -ssj ${ssj} < ${ssjMex} > ${prefix}.tsv
   """
 }
 
 process extractMex {
   input:
-  file(ssjMex) from D02
+  file ssjMex from D02
 
   output:
   file "${prefix}.tsv" into D03
