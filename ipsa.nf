@@ -89,7 +89,7 @@ if (params.annot =~ /.g[tf]f$/) {
     file annotation from Channel.fromPath(params.annot)
 
     output:
-    file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta
+    file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta, txIdxZetaMex
 
     script:
     prefix = annotation.name.replace(/.gtf/,'')
@@ -99,7 +99,7 @@ if (params.annot =~ /.g[tf]f$/) {
   }
 } else {
   txIdx = Channel.fromPath("${params.annot}")
-  (txIdxAnnotate, txIdxZeta) = txIdx.into(2)
+  (txIdxAnnotate, txIdxZeta, txIdxZetaMex) = txIdx.into(3)
 }
 
 process sjcount {
@@ -222,9 +222,6 @@ process constrainMex {
   input:
   set file(ssj), file(ssjMex) from constrainMult
 
-  when:
-  params.microexons
-
   output:
   file "${prefix}.tsv" into D02
 
@@ -241,9 +238,6 @@ process extractMex {
 
   output:
   file "${prefix}.tsv" into D03
-
-  when:
-  params.microexons
 
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
@@ -271,9 +265,6 @@ process idr {
 process idrMex {
   input:
   file tsv from D03
-
-  when:
-  params.microexons
 
   output:
   file "${prefix}.tsv" into D06
@@ -339,9 +330,6 @@ process zeta {
   file annotation from txIdxZeta.first()
   set file(ssc), file(ssj) from allA06
 
-  when:
-  !params.microexons
-
   output:
   file "${prefix}.gff" into A07
 
@@ -357,11 +345,8 @@ process zetaMex {
   publishDir params.dir
 
   input:
-  file annotation from txIdxZeta.first()
-  set file(ssc), file(ssj), file(exons) from allA06
-
-  when:
-  params.microexons
+  file annotation from txIdxZetaMex.first()
+  set file(ssc), file(ssj), file(exons) from allMex
 
   output:
   file "${prefix}.gff" into A07
