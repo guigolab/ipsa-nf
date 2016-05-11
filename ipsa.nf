@@ -219,7 +219,7 @@ process constrainMex {
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
   """
-  constrain_mult.pl  -ssj ${ssj}.tsv < ${ssjMex}  > ${prefix}.tsv
+  constrain_mult.pl  -ssj ${ssj} < ${ssjMex}  > ${prefix}.tsv
   """
 }
 
