@@ -136,6 +136,9 @@ process aggregateMex {
   input:
   set splits, file(tsv) from A01mex
 
+  when:
+  params.microexons
+
   output:
   file "${prefix}.tsv" into D01
 
@@ -190,12 +193,14 @@ constrain = ssj4constrain.mix(sscA02).groupBy { f ->
 }
 .flatMap()
 
-constrainMult = ssj4constrainMult.mix(D01).groupBy { f ->
-   f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
-}.map { m ->
-    m.values().collect { it.sort { it.baseName } }
+if ( params.microexons ) {
+  constrainMult = ssj4constrainMult.mix(D01).groupBy { f ->
+     f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
+  }.map { m ->
+      m.values().collect { it.sort { it.baseName } }
+  }
+  .flatMap()
 }
-.flatMap()
 
 process constrainSSC {
   input:
@@ -215,6 +220,9 @@ process constrainMex {
   input:
   set file(ssj), file(ssjMex) from constrainMult
 
+  when:
+  params.microexons
+
   output:
   file "${prefix}.tsv" into D02
 
@@ -231,6 +239,9 @@ process extractMex {
 
   output:
   file "${prefix}.tsv" into D03
+
+  when:
+  params.microexons
 
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
@@ -258,6 +269,9 @@ process idr {
 process idrMex {
   input:
   file tsv from D03
+
+  when:
+  params.microexons
 
   output:
   file "${prefix}.tsv" into D06
@@ -304,6 +318,10 @@ process sscA06 {
   """
 }
 
+if ( ! params.microexons ) {
+  D06 = Channel.empty()
+}
+
 allA06 = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
    f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
 }.map { m ->
@@ -317,7 +335,7 @@ process zeta {
 
   input:
   file annotation from txIdxZeta.first()
-  set file(ssc), file(ssj), file(exons) from allA06
+  set file(ssc), file(ssj) from allA06
 
   when:
   !params.microexons
