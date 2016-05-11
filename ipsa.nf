@@ -10,6 +10,7 @@ params.mincount = 10
 params.smpid = 'labExpId'
 params.status = 0
 params.readLength = 75
+params.microexons = false
 
 //print usage
 if (params.help) {
@@ -60,6 +61,7 @@ log.info "Sjcount parameters                 : ${params.param}"
 log.info "BAM files repository               : ${params.repository}"
 log.info "Sample id field                    : ${params.smpid}"
 log.info "Annotation status lower threshold  : ${params.status}"
+log.info "Include microexons                 : ${params.microexons}"
 log.info ""
 
 if (params.genome =~ /.fa$/) {
@@ -316,6 +318,30 @@ process zeta {
   input:
   file annotation from txIdxZeta.first()
   set file(ssc), file(ssj), file(exons) from allA06
+
+  when:
+  !params.microexons
+
+  output:
+  file "${prefix}.gff" into A07
+
+  script:
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
+  """
+  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
+  """
+}
+
+process zeta {
+  
+  publishDir params.dir
+
+  input:
+  file annotation from txIdxZeta.first()
+  set file(ssc), file(ssj), file(exons) from allA06
+
+  when:
+  params.microexons
 
   output:
   file "${prefix}.gff" into A07
