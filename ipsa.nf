@@ -200,6 +200,8 @@ if ( params.microexons ) {
       m.values().collect { it.sort { it.baseName } }
   }
   .flatMap()
+} else {
+  constrainMult = Channel.empty()
 }
 
 process constrainSSC {
@@ -350,7 +352,7 @@ process zeta {
   """
 }
 
-process zeta {
+process zetaMex {
   
   publishDir params.dir
 
