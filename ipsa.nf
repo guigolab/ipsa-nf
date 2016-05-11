@@ -214,7 +214,7 @@ process constrainMex {
   set file(ssj), file(ssjMex) from constrainMult
 
   output:
-  flle "${prefix}.tsv" into D02
+  file "${prefix}.tsv" into D02
 
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
@@ -233,7 +233,7 @@ process extractMex {
   script:
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
   """
-  extract_mex.pl  < ${ssjMex}  > ${prefix}.tsv
+  extract_mex.pl < ${ssjMex} > ${prefix}.tsv
   """
 }
 
