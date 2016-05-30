@@ -1,3 +1,6 @@
+// library imports
+import TsvIndexFile
+
 // parameters
 params.deltaSS = 10
 params.dir = 'A07'
@@ -9,7 +12,6 @@ params.merge = "all"
 params.mincount = 10
 params.smpid = 'labExpId'
 params.status = 0
-params.readLength = 75
 params.microexons = false
 
 //print usage
@@ -23,7 +25,7 @@ if (params.help) {
   log.info '    ipsa.nf [options]'
   log.info ''
   log.info 'Options:'
-  log.info '--in INDEX_FILE           the index file'
+  log.info '--index INDEX_FILE           the index file'
   log.info '--genome GENOME_FILE      the genome file (FASTA)'
   log.info '--annot ANNOTATION_FILE   the annotation file (gtf)'
   log.info '--deltaSS DELTA           distance threshold for splice sites, default=10'
@@ -47,7 +49,7 @@ log.info "I P S A ~ Integrative Pipeline for Splicing Analyses"
 log.info ""
 log.info "General parameters"
 log.info "------------------"
-log.info "Index file                         : ${params.in}"
+log.info "Index file                         : ${params.index}"
 log.info "Genome                             : ${params.genome}"
 log.info "Annotation                         : ${params.annot}"
 log.info "Splice sites distance threshold    : ${params.deltaSS}"
@@ -103,9 +105,12 @@ if (params.annot =~ /.g[tf]f$/) {
   (txIdxAnnotate, txIdxZeta, txIdxZetaMex) = txIdx.into(3)
 }
 
+bams = Channel
+.from(TsvIndexFile.parse(file(params.index)))
+
 process sjcount {
   input:
-  file bam from Channel.fromPath(params.bams)
+  set sample, id, file(bam), type, view, readType, readStrand, readLength from bams
 
   output:
   set val(1), file("${prefix}.A01.ssj.tsv") into A01
@@ -114,8 +119,29 @@ process sjcount {
 
   script:
   prefix = bam.name.replace(/.bam/,'')
+  def strandParams
+  switch (readStrand) {
+    case'SENSE':
+      strandParams = '-read1 0'
+      break
+    case'MATE1_SENSE':
+      strandParams = '-read1 0 -read2 1'
+      break
+    case 'NONE':
+      strandParams = '-unstranded'
+      break
+    default:
+      strandParams = ''
+      break
+  }
   """
-  sjcount -bam ${bam} -ssc ${prefix}.A01.ssc.tsv -ssj ${prefix}.A01.ssj.tsv -nbins ${params.readLength} ${params.param} -quiet
+  sjcount -bam ${bam} \
+          -ssc ${prefix}.A01.ssc.tsv \
+          -ssj ${prefix}.A01.ssj.tsv \
+          -nbins ${readLength} \
+          ${strandParams} \
+          ${params.param ?: ''} \
+          -quiet
   """
 }
 
