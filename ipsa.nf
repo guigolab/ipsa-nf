@@ -38,6 +38,7 @@ if (params.help) {
   log.info '--repository REPOSITORY   the repository subdirectory for bam files'
   log.info '--smpid SAMPLE_ID_FIELD   sample id field, default=labExpId'
   log.info '--status STATUS           annotation status lower threshold, default=0'
+  log.info '--microexons              include microexons, default=false'
   exit 1
 }
 
