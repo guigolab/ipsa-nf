@@ -1,3 +1,5 @@
+import nextflow.Nextflow
+
 /**
  *  Helper class to read input files and metadata from a TAB separated file
  *
@@ -22,7 +24,7 @@ class TsvIndexFile {
 			def list = line.split()
 		  def mergeId = list[0]
 		  def id = list[1]
-		  def path = new File(list[2])
+		  def path = Nextflow.file(list[2])
 		  def type = list[3]
 		  def view = list[4]
 		  def readType = list[5]
