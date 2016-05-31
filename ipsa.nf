@@ -76,7 +76,7 @@ if (params.genome =~ /.fa$/) {
     script:
     prefix = genome.name.replace(/.fa/, '')
     """
-    transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx
+    transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx -exactdir
     """
   }
 } else {
