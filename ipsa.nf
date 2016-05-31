@@ -113,8 +113,8 @@ process sjcount {
   set sample, id, file(bam), type, view, readType, readStrand, readLength from bams
 
   output:
-  set val(1), file("${prefix}.A01.ssj.tsv") into A01
-  set val(0), file("${prefix}.A01.ssc.tsv") into A01
+  set val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01
+  set val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01
   set val(2), file("${prefix}.A01.ssj.tsv") into A01mex
 
   script:
@@ -147,7 +147,7 @@ process sjcount {
 
 process aggregate {
   input:
-  set splits, file(tsv) from A01
+  set splits, file(tsv), readLength from A01
 
   output:
   file "${prefix}.tsv" into A02
@@ -155,7 +155,7 @@ process aggregate {
   script:
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
-  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${params.readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
+  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
   """
 }
 
