@@ -195,7 +195,7 @@ process annotate {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A02/,'A03')
   """
-  annotate.pl  -annot ${annotation} -dbx ${genomeDBX} -idx ${genomeIDX} -deltaSS ${params.deltaSS} -in ${ssj} > ${prefix}.tsv
+  annotate.pl -annot ${annotation} -dbx ${genomeDBX} -idx ${genomeIDX} -deltaSS ${params.deltaSS} -in ${ssj} > ${prefix}.tsv
   """
 }
 
@@ -209,7 +209,7 @@ process chooseStrand {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A03/,'A04')
   """
-  choose_strand.pl - < ${ssj}  -logfile ${prefix}.log > ${prefix}.tsv
+  choose_strand.pl - < ${ssj} -logfile ${prefix}.log > ${prefix}.tsv
   """
 }
 
@@ -320,7 +320,7 @@ process ssjA06 {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
-  awk '\$4>=1.5 && \$5>=0 && \$7<0.1'  ${ssj}  > ${prefix}.tsv
+  awk '\$4>=${params.entropy} && \$5>=${parmas.status} && \$7<${params.idr}' ${ssj} > ${prefix}.tsv
   """
 }
 
@@ -334,7 +334,7 @@ process sscA06 {
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
-  awk '\$4>=1.5 && \$7<0.1'  ${ssc}  > ${prefix}.tsv
+  awk '\$4>=${params.entropy} && \$7<${params.idr}' ${ssc} > ${prefix}.tsv
   """
 }
 
@@ -370,7 +370,7 @@ process zeta {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
-  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
+  zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
   """
 }
 
@@ -388,7 +388,7 @@ process zetaMex {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
-  zeta.pl  -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
+  zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
   """
 }
 
@@ -403,7 +403,7 @@ process ssjTsv2bed {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
-  tsv2bed.pl  < ${ssj} -extra 2,3,4,5,6,7 > ${prefix}.bed
+  tsv2bed.pl < ${ssj} -extra 2,3,4,5,6,7 > ${prefix}.bed
   """
 }
 
@@ -417,7 +417,7 @@ process sscTsv2bed {
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
-  tsv2bed.pl  < ${ssc} -extra 2 -ssc > ${prefix}.bed
+  tsv2bed.pl < ${ssc} -extra 2 -ssc > ${prefix}.bed
   """
 }
 
@@ -431,7 +431,7 @@ process tsv2gff {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
-  tsv2gff.pl  < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
+  tsv2gff.pl < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
   """
 }
 
