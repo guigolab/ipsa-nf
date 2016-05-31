@@ -320,7 +320,7 @@ process ssjA06 {
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
-  awk '\$4>=${params.entropy} && \$5>=${parmas.status} && \$7<${params.idr}' ${ssj} > ${prefix}.tsv
+  awk '\$4>=${params.entropy} && \$5>=${params.status} && \$7<${params.idr}' ${ssj} > ${prefix}.tsv
   """
 }
 
