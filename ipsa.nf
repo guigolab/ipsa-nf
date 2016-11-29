@@ -311,6 +311,9 @@ A05.choice( ssjA05,sscA05 ) { f ->
 }
 
 process ssjA06 {
+
+  publishDir 'A06'
+
   input:
   file ssj from ssjA05
 
@@ -325,6 +328,9 @@ process ssjA06 {
 }
 
 process sscA06 {
+
+  publishDir 'A06'
+
   input:
   file ssc from sscA05
 
