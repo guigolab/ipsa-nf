@@ -120,7 +120,7 @@ if (params.annot =~ /.g[tf]f$/) {
 bams = Channel
 .from(TsvIndexFile.parse(file(params.index)))
 
-process prepocBams {
+process preprocBams {
   input:
   set sample, id, file(bam), type, view, readType, readStrand from bams
 
@@ -128,8 +128,9 @@ process prepocBams {
   set sample, id, file(bam), type, view, readType, readStrand, stdout into bamsWreadLength
 
   script:
+  prefix = bam.name.replace(/.bam/,'')
   """
-  samtools view ${bam} | head -1 | awk '\$0=length(\$10)' | tr -d '\n'
+  samtools view -f4 ${bam} | head -1 | awk '\$0=length(\$10)' | tr -d '\\n'
   """
 }
 
