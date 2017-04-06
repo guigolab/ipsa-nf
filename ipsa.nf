@@ -13,6 +13,9 @@ params.mincount = 10
 params.smpid = 'labExpId'
 params.status = 0
 params.microexons = false
+params.help = false
+params.genome = null
+params.annot = null
 
 //print usage
 if (params.help) {
