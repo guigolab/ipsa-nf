@@ -29,8 +29,7 @@ class TsvIndexFile {
 		  def view = list[4]
 		  def readType = list[5]
 		  def readStrand = list[6]
-		  def readLength = list[7]
-		  bams << [ mergeId, id, path, type, view, readType, readStrand, readLength ]
+		  bams << [ mergeId, id, path, type, view, readType, readStrand ]
 		}
 		return bams
 	}

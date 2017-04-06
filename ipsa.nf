@@ -108,13 +108,26 @@ if (params.annot =~ /.g[tf]f$/) {
 bams = Channel
 .from(TsvIndexFile.parse(file(params.index)))
 
-process sjcount {
+process prepocBams {
   input:
-  set sample, id, file(bam), type, view, readType, readStrand, readLength from bams
+  set sample, id, file(bam), type, view, readType, readStrand from bams
 
   output:
-  set val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01
-  set val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01
+  set sample, id, file(bam), type, view, readType, readStrand, stdout into bamsWreadLength
+
+  script:
+  """
+  samtools view ${bam} | head -1 | awk '\$0=length(\$10)' | tr -d '\n'
+  """
+}
+
+process sjcount {
+  input:
+  set sample, id, file(bam), type, view, readType, readStrand, readLength from bamsWreadLength
+
+  output:
+  set val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01ssc
+  set val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01ssj
   set val(2), file("${prefix}.A01.ssj.tsv") into A01mex
 
   script:
