@@ -47,6 +47,15 @@ if (params.help) {
   exit 1
 }
 
+// check mandatory options
+if (!params.genome) {
+    exit 1, "Reference genome not specified"
+}
+
+if (!params.annot) {
+    exit 1, "Annotation not specified"
+}
+
 log.info ""
 log.info "I P S A ~ Integrative Pipeline for Splicing Analyses"
 log.info ""
