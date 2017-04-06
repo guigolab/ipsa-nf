@@ -160,7 +160,7 @@ process sjcount {
 
 process aggregate {
   input:
-  set splits, file(tsv), readLength from A01
+  set splits, file(tsv), readLength from A01ssc.mix(A01ssj)
 
   output:
   file "${prefix}.tsv" into A02
@@ -402,7 +402,7 @@ process zetaMex {
   set file(ssc), file(ssj), file(exons) from allMex
 
   output:
-  file "${prefix}.gff" into A07
+  file "${prefix}.gff" into A07mex
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
@@ -431,7 +431,7 @@ process sscTsv2bed {
   file ssc from sscA06
 
   output:
-  file "${prefix}.bed" into E06
+  file "${prefix}.bed" into E06ssc
 
   script:
   prefix = ssc.name.replace(/.tsv/,'').replace(/A06/,'E06')
@@ -445,7 +445,7 @@ process tsv2gff {
   file ssj from ssj4gffA06
 
   output:
-  file "${prefix}.gff" into E06
+  file "${prefix}.gff" into E06ssj
 
   script:
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
