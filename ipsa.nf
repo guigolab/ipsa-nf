@@ -16,6 +16,8 @@ params.microexons = false
 params.help = false
 params.genome = null
 params.annot = null
+params.param = ''
+param.repository = ''
 
 //print usage
 if (params.help) {
