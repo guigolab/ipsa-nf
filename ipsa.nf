@@ -2,9 +2,9 @@
 import TsvIndexFile
 
 // parameters for test run
-params.index = '${baseDir}/data/index.tsv'
-params.genome = '${baseDir}/data/genome.fa'
-params.annot = '${baseDir}/data/annotation.gtf'
+params.index = "${baseDir}/data/index.tsv"
+params.genome = "${baseDir}/data/genome.fa"
+params.annot = "${baseDir}/data/annotation.gtf"
 
 
 // parameters
