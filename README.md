@@ -1,4 +1,4 @@
-# ipsa-nf
+# IPSA-nf
 
 An Integrative Pipeline for Splicing Analyses (IPSA) written in the Nextflow DSL.
 
