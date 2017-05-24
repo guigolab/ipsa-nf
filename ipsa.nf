@@ -17,7 +17,7 @@ params.help = false
 params.genome = null
 params.annot = null
 params.param = ''
-param.repository = ''
+params.repository = ''
 
 //print usage
 if (params.help) {
@@ -30,7 +30,7 @@ if (params.help) {
   log.info '    ipsa.nf [options]'
   log.info ''
   log.info 'Options:'
-  log.info '--index INDEX_FILE           the index file'
+  log.info '--index INDEX_FILE        the index file'
   log.info '--genome GENOME_FILE      the genome file (FASTA)'
   log.info '--annot ANNOTATION_FILE   the annotation file (gtf)'
   log.info '--deltaSS DELTA           distance threshold for splice sites, default=10'
