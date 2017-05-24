@@ -132,7 +132,7 @@ process preprocBams {
   script:
   prefix = bam.name.replace(/.bam/,'')
   """
-  samtools view -f4 ${bam} | head -1 | awk '\$0=length(\$10)' | tr -d '\\n'
+  samtools view -F4 ${bam} | head -1 | awk '\$0=length(\$10)' | tr -d '\\n'
   """
 }
 
