@@ -1,4 +1,5 @@
 import nextflow.Nextflow
+import java.nio.file.Path
 
 /**
  *  Helper class to read input files and metadata from a TAB separated file
@@ -24,7 +25,7 @@ class TsvIndexFile {
 			def list = line.split()
 		  def mergeId = list[0]
 		  def id = list[1]
-		  def path = Nextflow.file(list[2])
+		  def path = resolveFile(list[2], f)
 		  def type = list[3]
 		  def view = list[4]
 		  def readType = list[5]
@@ -33,4 +34,22 @@ class TsvIndexFile {
 		}
 		return bams
 	}
+
+	/*
+	 * Given a string path resolve it against the index file location.
+	 * Params: 
+	 * - str: a string value represting the file pah to be resolved
+	 * - index: path location against which relative paths need to be resolved 
+	 */
+	static resolveFile( String str, Path index ) {
+	  if( str.startsWith('/') || str =~ /^[\w\d]*:\// ) {
+	    return Nextflow.file(str)
+	  }
+	  else if( index instanceof Path ) {
+	    return index.parent.resolve(str)
+	  }
+	  else {
+	    return Nextflow.file(str) 
+	  }
+} 
 }
