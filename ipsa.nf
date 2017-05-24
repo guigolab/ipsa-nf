@@ -1,6 +1,12 @@
 // library imports
 import TsvIndexFile
 
+// parameters for test run
+params.index = 'data/index.tsv'
+params.genome = 'data/genome.fa'
+params.annot = 'data/annotation.gtf'
+
+
 // parameters
 params.deltaSS = 10
 params.dir = 'A07'
@@ -14,8 +20,6 @@ params.smpid = 'labExpId'
 params.status = 0
 params.microexons = false
 params.help = false
-params.genome = null
-params.annot = null
 params.param = ''
 params.repository = ''
 
