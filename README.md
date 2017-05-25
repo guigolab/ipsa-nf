@@ -1,6 +1,6 @@
 # IPSA-nf
 
-[![CircleCI status](https://circleci.com/gh/guigolab/ipsa-nf.svg?style=shield)](https://circleci.com/gh/guigolab/ipsa-nf/tree/master)
+[![CircleCI](https://circleci.com/gh/guigolab/ipsa-nf/tree/master.svg?style=shield&circle-token=e427ded8dfae0ed7f405bce3f1c0bfcfeb40d80c)](https://circleci.com/gh/guigolab/ipsa-nf/tree/master)
 
 An Integrative Pipeline for Splicing Analyses (IPSA) written in the Nextflow DSL.
 
