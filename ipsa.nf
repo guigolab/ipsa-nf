@@ -9,7 +9,7 @@ params.annot = "${baseDir}/data/annotation.gtf"
 
 // parameters
 params.deltaSS = 10
-params.dir = 'A07'
+params.dir = 'data'
 params.entropy = 1.5
 params.group = 'labExpId'
 params.idr = 0.1
@@ -141,15 +141,19 @@ process preprocBams {
 }
 
 process sjcount {
+  
+  publishDir "${params.dir}/${endpoint}"
+
   input:
   set sample, id, file(bam), type, view, readType, readStrand, readLength from bamsWreadLength
 
   output:
-  set val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01ssc
-  set val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01ssj
-  set val(2), file("${prefix}.A01.ssj.tsv") into A01mex
+  set id, val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01ssc
+  set id, val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01ssj
+  set id, val(2), file("${prefix}.A01.ssj.tsv") into A01mex
 
   script:
+  endpoint = 'A01'
   prefix = bam.name.replace(/.bam/,'')
   def strandParams
   switch (readStrand) {
@@ -178,13 +182,17 @@ process sjcount {
 }
 
 process aggregate {
+  
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  set splits, file(tsv), readLength from A01ssc.mix(A01ssj)
+  set id, splits, file(tsv), readLength from A01ssc.mix(A01ssj)
 
   output:
-  file "${prefix}.tsv" into A02
+  set id, file("${prefix}.tsv") into A02
 
   script:
+  endpoint = 'A02'
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
   """
   awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
@@ -192,16 +200,20 @@ process aggregate {
 }
 
 process aggregateMex {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  set splits, file(tsv) from A01mex
+  set id, splits, file(tsv) from A01mex
 
   when:
   params.microexons
 
   output:
-  file "${prefix}.tsv" into D01
+  set id, file("${prefix}.tsv") into D01
 
   script:
+  endpoint = 'D01'
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01.ssj/,'D01')
   """
   awk '\$2==${splits}' ${tsv} | agg.pl -logfile ${prefix}.log > ${prefix}.tsv 
@@ -211,20 +223,25 @@ process aggregateMex {
 ssjA02 = Channel.create()
 sscA02 = Channel.create()
 
-A02.choice( ssjA02, sscA02 ) { f ->
+A02.choice( ssjA02, sscA02 ) { it ->
+    f = it[1]
     f.name =~ /ssj/ ? 0 : 1
 }
 
 process annotate {
+  
+  publishDir "${params.dir}/${endpoint}"
+
   input:
   set file(genomeDBX), file(genomeIDX) from genomeIdx.first()
   file annotation from txIdxAnnotate.first()
-  file ssj from ssjA02
+  set id, file(ssj) from ssjA02
 
   output:
-  file "${prefix}.tsv" into A03
+  set id, file("${prefix}.tsv") into A03
 
   script:
+  endpoint = 'A03'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A02/,'A03')
   """
   annotate.pl -annot ${annotation} -dbx ${genomeDBX} -idx ${genomeIDX} -deltaSS ${params.deltaSS} -in ${ssj} > ${prefix}.tsv
@@ -232,45 +249,49 @@ process annotate {
 }
 
 process chooseStrand {
+  
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  file ssj from A03
+  set id, file(ssj) from A03
 
   output:
-  file "${prefix}.tsv" into ssjA04, ssj4constrain, ssj4constrainMult
+  set id, file("${prefix}.tsv") into ssjA04, ssj4constrain, ssj4constrainMult
 
   script:
+  endpoint = 'A04'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A03/,'A04')
   """
   choose_strand.pl - < ${ssj} -logfile ${prefix}.log > ${prefix}.tsv
   """
 }
 
-constrain = ssj4constrain.mix(sscA02).groupBy { f ->
-   f.baseName.replaceAll(/\.A0[24]\.ss[cj]/,'')
-}.map { m ->
-     m.values().collect { it.sort { it.baseName } }
+constrain = ssj4constrain.phase(sscA02)
+.map { it -> 
+  [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
 }
-.flatMap()
 
 if ( params.microexons ) {
-  constrainMult = ssj4constrainMult.mix(D01).groupBy { f ->
-     f.baseName.replaceAll(/\.(A04\.ssj|D01)/,'')
-  }.map { m ->
-      m.values().collect { it.sort { it.baseName } }
+  constrainMult = ssj4constrainMult.phase(D01)
+  .map { it -> 
+    [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
   }
-  .flatMap()
 } else {
   constrainMult = Channel.empty()
 }
 
 process constrainSSC {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  set file(ssc), file(ssj) from constrain
+  set id, file(ssc), file(ssj) from constrain
 
   output:
-  file "${prefix}.tsv" into sscA04
+  set id, file("${prefix}.tsv") into sscA04
 
   script:
+  endpoint = 'A04'
   prefix = ssc.name.replace(/.tsv/,'').replace(/A02/,'A04')
   """
   constrain_ssc.pl -ssj ${ssj} < ${ssc} > ${prefix}.tsv  
@@ -278,13 +299,17 @@ process constrainSSC {
 }
 
 process constrainMex {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  set file(ssj), file(ssjMex) from constrainMult
+  set id, file(ssj), file(ssjMex) from constrainMult
 
   output:
-  file "${prefix}.tsv" into D02
+  set id, file("${prefix}.tsv") into D02
 
   script:
+  endpoint = 'D02'
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
   """
   constrain_mult.pl -ssj ${ssj} < ${ssjMex} > ${prefix}.tsv
@@ -292,59 +317,79 @@ process constrainMex {
 }
 
 process extractMex {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  file ssjMex from D02
+  set id, file(ssjMex) from D02
 
   output:
-  file "${prefix}.tsv" into D03
+  set id, file("${prefix}.tsv") into D03
 
   script:
+  endpoint = 'D03'
   prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
   """
   extract_mex.pl < ${ssjMex} > ${prefix}.tsv
   """
 }
 
-A04 = ssjA04.mix(sscA04)
+process ssjIDR {
 
-process idr {
+  publishDir "${params.dir}/${endpoint}"
+  
   input:
-  file tsv from A04
+  set id, file(tsv) from ssjA04
 
   output:
-  file "${prefix}.tsv" into A05
+  file "${prefix}.tsv" into ssjA05
 
   script:
-  prefix = tsv.name.replace(/.tsv/,'').replace(/A04/,'A05')
+  endpoint = 'A05'
+  prefix = "${id}.${endpoint}.ssj"
+  """
+  idr4sj.pl ${tsv} > ${prefix}.tsv
+  """
+}
+
+process sscIDR {
+
+  publishDir "${params.dir}/${endpoint}"
+  
+  input:
+  set id, file(tsv) from sscA04
+
+  output:
+  file "${prefix}.tsv" into sscA05
+
+  script:
+  endpoint = 'A05'
+  prefix = "${id}.${endpoint}.ssc"
   """
   idr4sj.pl ${tsv} > ${prefix}.tsv
   """
 }
 
 process idrMex {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
-  file tsv from D03
+  set id, file(tsv) from D03
 
   output:
-  file "${prefix}.tsv" into D06
+  file "${id}.${endpoint}.ssj.tsv" into D06
 
   script:
-  prefix = tsv.name.replace(/.tsv/,'').replace(/D03/,'D06')
+  endpoint = 'D06'
   """
-  idr4sj.pl ${tsv} > ${prefix}.tsv
+  idr4sj.pl ${tsv} > ${id}.${endpoint}.mex.tsv
   """
-}
-
-ssjA05 = Channel.create()
-sscA05 = Channel.create()
-
-A05.choice( ssjA05,sscA05 ) { f ->
-    f.name =~ /ssj/ ? 0 : 1
 }
 
 process ssjA06 {
 
-  publishDir 'A06'
+  publishDir "${params.dir}/${endpoint}"
 
   input:
   file ssj from ssjA05
@@ -353,6 +398,7 @@ process ssjA06 {
   file "${prefix}.tsv" into ssjA06, ssj4gffA06, ssj4allA06
 
   script:
+  endpoint = 'A06'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
   awk '\$4>=${params.entropy} && \$5>=${params.status} && \$7<${params.idr}' ${ssj} > ${prefix}.tsv
@@ -361,7 +407,7 @@ process ssjA06 {
 
 process sscA06 {
 
-  publishDir 'A06'
+  publishDir "${params.dir}/${endpoint}"
 
   input:
   file ssc from sscA05
@@ -370,6 +416,7 @@ process sscA06 {
   file "${prefix}.tsv" into sscA06, ssc4allA06
 
   script:
+  endpoint = 'A06'
   prefix = ssc.name.replace(/.tsv/,'').replace(/A05/,'A06')
   """
   awk '\$4>=${params.entropy} && \$7<${params.idr}' ${ssc} > ${prefix}.tsv
@@ -396,7 +443,7 @@ if ( params.microexons ) {
 
 process zeta {
   
-  publishDir params.dir
+  publishDir "${params.dir}/${endpoint}"
 
   input:
   file annotation from txIdxZeta.first()
@@ -406,6 +453,7 @@ process zeta {
   file "${prefix}.gff" into A07
 
   script:
+  endpoint = 'A07'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
   zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
@@ -414,7 +462,7 @@ process zeta {
 
 process zetaMex {
   
-  publishDir params.dir
+  publishDir "${params.dir}/${endpoint}"
 
   input:
   file annotation from txIdxZetaMex.first()
@@ -424,6 +472,7 @@ process zetaMex {
   file "${prefix}.gff" into A07mex
 
   script:
+  endpoint = 'A07'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
   """
   zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
@@ -432,6 +481,9 @@ process zetaMex {
 
 
 process ssjTsv2bed {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
   file ssj from ssjA06
 
@@ -439,6 +491,7 @@ process ssjTsv2bed {
   file "${prefix}.bed" into E06
 
   script:
+  endpoint = 'E06'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
   tsv2bed.pl < ${ssj} -extra 2,3,4,5,6,7 > ${prefix}.bed
@@ -446,6 +499,9 @@ process ssjTsv2bed {
 }
 
 process sscTsv2bed {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
   file ssc from sscA06
 
@@ -453,6 +509,7 @@ process sscTsv2bed {
   file "${prefix}.bed" into E06ssc
 
   script:
+  endpoint = 'E06'
   prefix = ssc.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
   tsv2bed.pl < ${ssc} -extra 2 -ssc > ${prefix}.bed
@@ -460,6 +517,9 @@ process sscTsv2bed {
 }
 
 process tsv2gff {
+
+  publishDir "${params.dir}/${endpoint}"
+
   input:
   file ssj from ssj4gffA06
 
@@ -467,6 +527,7 @@ process tsv2gff {
   file "${prefix}.gff" into E06ssj
 
   script:
+  endpoint = 'E06'
   prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
   """
   tsv2gff.pl < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
