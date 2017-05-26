@@ -60,3 +60,9 @@ fe2aff2c4edf5e44deebb510af3b7ba9 *data/E06/E18_rep2.E06.ssj.bed
 6048dd3a37b4d02ddb93618b356996a2 *data/E06/E18_rep2.E06.ssj.gff
 1d6fa775fbf99767f84e4bd982601a63 *data/all.counts.ssj.tsv
 2e3f45e2b7a9d5d3ca4378a2b2f5fd26 *data/all.counts.ssc.tsv
+be9ad788fa13d35b5fdf1765a1086608 *data/all.A.cosi.tsv
+7a2426542ae1f21b27940e60647c3bc1 *data/all.A.cosi3.tsv
+9fb78ec468f6362247d0f08d86bc0692 *data/all.A.cosi5.tsv
+820e761675d80b2008b2a509245b4a5f *data/all.A.psi.tsv
+f7e5d9d401c5e65288695e2c30bed938 *data/all.A.psi3.tsv
+0c9b7f3634225c88df5340b90ccd546f *data/all.A.psi5.tsv

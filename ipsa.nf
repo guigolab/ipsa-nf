@@ -395,8 +395,8 @@ process ssjA06 {
   set id, file(ssj) from ssjA05
 
   output:
-  file "${prefix}.tsv" into ssjA06, ssj4gffA06, ssj4allA06
-  set id, file("${prefix}.tsv") into ssj4merge
+  file "${prefix}.tsv" into ssjA06, ssj4gffA06
+  set id, file("${prefix}.tsv") into ssj4merge, ssj4allA06
 
   script:
   endpoint = 'A06'
@@ -414,8 +414,8 @@ process sscA06 {
   set id, file(ssc) from sscA05
 
   output:
-  file "${prefix}.tsv" into sscA06, ssc4allA06
-  set id, file("${prefix}.tsv") into ssc4merge
+  file "${prefix}.tsv" into sscA06
+  set id, file("${prefix}.tsv") into ssc4merge, ssc4allA06
 
   script:
   endpoint = 'A06'
@@ -448,12 +448,9 @@ if ( params.microexons ) {
   .flatMap()
   allA06 = Channel.empty()
 } else {
-  allA06 = ssj4allA06.mix(ssc4allA06).groupBy { f ->
-     f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
-  }.map { m ->
-      m.values().collect { it.sort { it.baseName } }
+  allA06 = ssj4allA06.phase(ssc4allA06).map { it ->
+    [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
   }
-  .flatMap()
   allMex = Channel.empty()
 }
 
@@ -499,10 +496,10 @@ process zeta {
 
   input:
   file annotation from txIdxZeta.first()
-  set file(ssc), file(ssj) from allA06
+  set id, file(ssc), file(ssj) from allA06
 
   output:
-  file "${prefix}.gff" into A07
+  set id, file("${prefix}.gff") into A07
 
   script:
   endpoint = 'A07'
@@ -510,6 +507,37 @@ process zeta {
   """
   zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
   """
+}
+
+A07.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  gffs = [i[1], j[1]].flatten()  
+  return [ids, gffs]
+}
+.into {A074merge}
+
+process mergeGFFzeta {
+  publishDir "${params.dir}"
+  
+  input:
+  set ids, file(sscs) from A074merge
+
+  output:
+  file "${prefix}.psi.tsv"
+  file "${prefix}.psi3.tsv"
+  file "${prefix}.psi5.tsv"
+  file "${prefix}.cosi.tsv"
+  file "${prefix}.cosi3.tsv"
+  file "${prefix}.cosi5.tsv"
+
+  shell:
+  prefix = "all.A"
+  input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
+  features = ['cosi', 'cosi3', 'cosi5', 'psi', 'psi3', 'psi5']
+  output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
+  percent = 0.25
+  transf = 'log'
+  template 'merge_gff.pl'
 }
 
 process zetaMex {
