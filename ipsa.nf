@@ -475,8 +475,6 @@ process mergeTsvSSJ {
   template 'merge_tsv.pl'
 }
 
-return
-
 process mergeTsvSSC {
   publishDir "${params.dir}"
   
