@@ -425,6 +425,20 @@ process sscA06 {
   """
 }
 
+ssj4merge.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  ssjs = [i[1], j[1]].flatten()  
+  return [ids, ssjs]
+}
+.into {ssj4mergeSplit}
+
+ssc4merge.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  sscs = [i[1], j[1]].flatten()  
+  return [ids, sscs]
+}
+.into {ssc4mergeSplit}
+
 if ( params.microexons ) {
   allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
      f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
@@ -443,13 +457,6 @@ if ( params.microexons ) {
   allMex = Channel.empty()
 }
 
-ssj4merge.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  ssjs = [i[1], j[1]].flatten()  
-  return [ids, ssjs]
-}
-.into {ssj4mergeSplit}
-
 process mergeTsvSSJ {
   publishDir "${params.dir}"
   
@@ -463,17 +470,12 @@ process mergeTsvSSJ {
   by = 1
   val = 2
   sep = '_'
-  input = [ssjs.toList(), ids].transpose().flatten().collect { '"' + it + '"' }.join(',')
+  input = [ssjs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
   prefix = "all.counts.ssj"
   template 'merge_tsv.pl'
 }
 
-ssc4merge.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  sscs = [i[1], j[1]].flatten()  
-  return [ids, sscs]
-}
-.into {ssc4mergeSplit}
+return
 
 process mergeTsvSSC {
   publishDir "${params.dir}"
@@ -488,7 +490,7 @@ process mergeTsvSSC {
   by = 1
   val = 2
   sep = '_'
-  input = [sscs.toList(), ids].transpose().flatten().collect { '"' + it + '"' }.join(',')
+  input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
   prefix = "all.counts.ssc"
   template 'merge_tsv.pl'
 }
