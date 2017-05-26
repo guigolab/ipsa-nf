@@ -468,7 +468,7 @@ process mergeTsvSSJ {
   val = 2
   sep = '_'
   input = [ssjs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  prefix = "all.counts.ssj"
+  prefix = "${params.merge}.counts.ssj"
   template 'merge_tsv.pl'
 }
 
@@ -486,7 +486,7 @@ process mergeTsvSSC {
   val = 2
   sep = '_'
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  prefix = "all.counts.ssc"
+  prefix = "${params.merge}.counts.ssc"
   template 'merge_tsv.pl'
 }
 
@@ -531,7 +531,7 @@ process mergeGFFzeta {
   file "${prefix}.cosi5.tsv"
 
   shell:
-  prefix = "all.A"
+  prefix = "${params.merge}.A"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
   features = ['cosi', 'cosi3', 'cosi5', 'psi', 'psi3', 'psi5']
   output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
