@@ -58,3 +58,5 @@ fd852fcbd87f6164dafccb022a1840e7 *data/E06/E18_rep1.E06.ssc.bed
 5359200d0c638a75fe18c35bc0d7be24 *data/E06/E18_rep2.E06.ssc.bed
 fe2aff2c4edf5e44deebb510af3b7ba9 *data/E06/E18_rep2.E06.ssj.bed
 6048dd3a37b4d02ddb93618b356996a2 *data/E06/E18_rep2.E06.ssj.gff
+1d6fa775fbf99767f84e4bd982601a63 *data/all.counts.ssj.tsv
+2e3f45e2b7a9d5d3ca4378a2b2f5fd26 *data/all.counts.ssc.tsv

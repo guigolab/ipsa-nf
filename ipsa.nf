@@ -342,7 +342,7 @@ process ssjIDR {
   set id, file(tsv) from ssjA04
 
   output:
-  file "${prefix}.tsv" into ssjA05
+  set id, file("${prefix}.tsv") into ssjA05
 
   script:
   endpoint = 'A05'
@@ -360,7 +360,7 @@ process sscIDR {
   set id, file(tsv) from sscA04
 
   output:
-  file "${prefix}.tsv" into sscA05
+  set id, file("${prefix}.tsv") into sscA05
 
   script:
   endpoint = 'A05'
@@ -392,10 +392,11 @@ process ssjA06 {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  file ssj from ssjA05
+  set id, file(ssj) from ssjA05
 
   output:
   file "${prefix}.tsv" into ssjA06, ssj4gffA06, ssj4allA06
+  set id, file("${prefix}.tsv") into ssj4merge
 
   script:
   endpoint = 'A06'
@@ -410,10 +411,11 @@ process sscA06 {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  file ssc from sscA05
+  set id, file(ssc) from sscA05
 
   output:
   file "${prefix}.tsv" into sscA06, ssc4allA06
+  set id, file("${prefix}.tsv") into ssc4merge
 
   script:
   endpoint = 'A06'
@@ -439,6 +441,56 @@ if ( params.microexons ) {
   }
   .flatMap()
   allMex = Channel.empty()
+}
+
+ssj4merge.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  ssjs = [i[1], j[1]].flatten()  
+  return [ids, ssjs]
+}
+.into {ssj4mergeSplit}
+
+process mergeTsvSSJ {
+  publishDir "${params.dir}"
+  
+  input:
+  set ids, file(ssjs) from ssj4mergeSplit
+
+  output:
+  file "${prefix}.tsv"
+
+  shell:
+  by = 1
+  val = 2
+  sep = '_'
+  input = [ssjs.toList(), ids].transpose().flatten().collect { '"' + it + '"' }.join(',')
+  prefix = "all.counts.ssj"
+  template 'merge_tsv.pl'
+}
+
+ssc4merge.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  sscs = [i[1], j[1]].flatten()  
+  return [ids, sscs]
+}
+.into {ssc4mergeSplit}
+
+process mergeTsvSSC {
+  publishDir "${params.dir}"
+  
+  input:
+  set ids, file(sscs) from ssc4mergeSplit
+
+  output:
+  file "${prefix}.tsv"
+
+  shell:
+  by = 1
+  val = 2
+  sep = '_'
+  input = [sscs.toList(), ids].transpose().flatten().collect { '"' + it + '"' }.join(',')
+  prefix = "all.counts.ssc"
+  template 'merge_tsv.pl'
 }
 
 process zeta {
