@@ -110,7 +110,7 @@ if (params.annot =~ /.g[tf]f$/) {
     file annotation from Channel.fromPath(params.annot)
 
     output:
-    file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta, txIdxZetaMex
+    file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta, txIdxZetaMex, txIdxPsicas
 
     script:
     prefix = annotation.name.replace(/.gtf/,'')
@@ -119,12 +119,12 @@ if (params.annot =~ /.g[tf]f$/) {
     """
   }
 } else {
-  txIdx = Channel.fromPath("${params.annot}")
-  (txIdxAnnotate, txIdxZeta, txIdxZetaMex) = txIdx.into(3)
+  Channel.fromPath("${params.annot}")
+    .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
 bams = Channel
-.from(TsvIndexFile.parse(file(params.index)))
+  .from(TsvIndexFile.parse(file(params.index)))
 
 process preprocBams {
   input:
@@ -396,7 +396,7 @@ process ssjA06 {
 
   output:
   file "${prefix}.tsv" into ssjA06, ssj4gffA06
-  set id, file("${prefix}.tsv") into ssj4merge, ssj4allA06
+  set id, file("${prefix}.tsv") into ssj4merge, ssj4allA06, ssj4psicasA06
 
   script:
   endpoint = 'A06'
@@ -509,12 +509,38 @@ process zeta {
   """
 }
 
+process psicas {
+  
+  publishDir "${params.dir}/${endpoint}"
+
+  input:
+  file annotation from txIdxPsicas.first()
+  set id, file(ssj) from ssj4psicasA06
+
+  output:
+  set id, file("${prefix}.gff") into B07
+
+  script:
+  endpoint = 'B07'
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
+  """
+  psicas.pl -ssj ${ssj} -annot ${annotation} -mincount ${params.mincount} > ${prefix}.gff 
+  """
+}
+
 A07.reduce([[],[]]) { i, j ->
   ids = [i[0], j[0]].flatten()  
   gffs = [i[1], j[1]].flatten()  
   return [ids, gffs]
 }
 .into {A074merge}
+
+B07.reduce([[],[]]) { i, j ->
+  ids = [i[0], j[0]].flatten()  
+  gffs = [i[1], j[1]].flatten()  
+  return [ids, gffs]
+}
+.into {B074merge}
 
 process mergeGFFzeta {
   publishDir "${params.dir}"
@@ -534,6 +560,25 @@ process mergeGFFzeta {
   prefix = "${params.merge}.A"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
   features = ['cosi', 'cosi3', 'cosi5', 'psi', 'psi3', 'psi5']
+  output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
+  percent = 0.25
+  transf = 'log'
+  template 'merge_gff.pl'
+}
+
+process mergeGFFpsicas {
+  publishDir "${params.dir}"
+  
+  input:
+  set ids, file(sscs) from B074merge
+
+  output:
+  file "${prefix}.psicas.tsv"
+
+  shell:
+  prefix = "${params.merge}.B"
+  input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
+  features = ['psicas']
   output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
   percent = 0.25
   transf = 'log'

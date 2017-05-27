@@ -46,6 +46,10 @@ ed367bef8abc793836600d36f44d4562 *data/A06/E18_rep1.A06.ssj.tsv
 56d2758a9695dd5afa5433057ce8c7bd *data/A07/E14_rep2.A07.gff
 044e6c7ea16ad664665550f989d271be *data/A07/E18_rep1.A07.gff
 e5505c827f5f4eae21985729c10e39d4 *data/A07/E18_rep2.A07.gff
+78828a6389a7ec65d664d061e951b7ed *data/B07/E14_rep1.B07.gff
+a4f274fb4748cac444b2d76d3f4d412a *data/B07/E14_rep2.B07.gff
+fb64757143dececcb16fdf9e4d51a0e0 *data/B07/E18_rep1.B07.gff
+8d5db00c69a6180a980e564296be7bfd *data/B07/E18_rep2.B07.gff
 c9e9ed7dca8a7e805006bdead9d87b0e *data/E06/E14_rep1.E06.ssc.bed
 54b2190caeca50f2f7d5277eec934759 *data/E06/E14_rep1.E06.ssj.bed
 37f8272739bf8e63f7bd81bac35c77eb *data/E06/E14_rep1.E06.ssj.gff
@@ -58,11 +62,12 @@ fd852fcbd87f6164dafccb022a1840e7 *data/E06/E18_rep1.E06.ssc.bed
 5359200d0c638a75fe18c35bc0d7be24 *data/E06/E18_rep2.E06.ssc.bed
 fe2aff2c4edf5e44deebb510af3b7ba9 *data/E06/E18_rep2.E06.ssj.bed
 6048dd3a37b4d02ddb93618b356996a2 *data/E06/E18_rep2.E06.ssj.gff
-1d6fa775fbf99767f84e4bd982601a63 *data/all.counts.ssj.tsv
-2e3f45e2b7a9d5d3ca4378a2b2f5fd26 *data/all.counts.ssc.tsv
 be9ad788fa13d35b5fdf1765a1086608 *data/all.A.cosi.tsv
 7a2426542ae1f21b27940e60647c3bc1 *data/all.A.cosi3.tsv
 9fb78ec468f6362247d0f08d86bc0692 *data/all.A.cosi5.tsv
 820e761675d80b2008b2a509245b4a5f *data/all.A.psi.tsv
 f7e5d9d401c5e65288695e2c30bed938 *data/all.A.psi3.tsv
 0c9b7f3634225c88df5340b90ccd546f *data/all.A.psi5.tsv
+bd86b7e5a22bb838605e9ada3fb1ee7a *data/all.B.psicas.tsv
+1d6fa775fbf99767f84e4bd982601a63 *data/all.counts.ssj.tsv
+2e3f45e2b7a9d5d3ca4378a2b2f5fd26 *data/all.counts.ssc.tsv
