@@ -425,19 +425,21 @@ process sscA06 {
   """
 }
 
-ssj4merge.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  ssjs = [i[1], j[1]].flatten()  
-  return [ids, ssjs]
-}
-.into {ssj4mergeSplit}
+ssj4merge.toSortedList { a,b -> a[0] <=> b[0] }
+.map { list ->
+  ids = []
+  ssjs = []
+  list.each { ids << it[0]; ssjs << it[1] }
+  [ids, ssjs]
+}.into {ssj4mergeSplit}
 
-ssc4merge.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  sscs = [i[1], j[1]].flatten()  
-  return [ids, sscs]
-}
-.into {ssc4mergeSplit}
+ssc4merge.toSortedList { a,b -> a[0] <=> b[0] }
+.map { list ->
+  ids = []
+  sscs = []
+  list.each { ids << it[0]; sscs << it[1] }
+  [ids, sscs]
+}.into {ssc4mergeSplit}
 
 if ( params.microexons ) {
   allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
@@ -528,19 +530,21 @@ process psicas {
   """
 }
 
-A07.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  gffs = [i[1], j[1]].flatten()  
-  return [ids, gffs]
-}
-.into {A074merge}
+A07.toSortedList { a,b -> a[0] <=> b[0] }
+.map { list ->
+  ids = []
+  gffs = []
+  list.each { ids << it[0]; gffs << it[1] }
+  [ids, gffs]
+}.into {A074merge}
 
-B07.reduce([[],[]]) { i, j ->
-  ids = [i[0], j[0]].flatten()  
-  gffs = [i[1], j[1]].flatten()  
-  return [ids, gffs]
-}
-.into {B074merge}
+B07.toSortedList { a,b -> a[0] <=> b[0] }
+.map { list ->
+  ids = []
+  gffs = []
+  list.each { ids << it[0]; gffs << it[1] }
+  [ids, gffs]
+}.into {B074merge}
 
 process mergeGFFzeta {
   publishDir "${params.dir}"
