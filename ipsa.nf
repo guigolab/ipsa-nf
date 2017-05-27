@@ -505,7 +505,7 @@ process zeta {
 
   script:
   endpoint = 'A07'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
   """
   zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -mincount ${params.mincount} > ${prefix}.gff 
   """
@@ -602,7 +602,7 @@ process zetaMex {
 
   script:
   endpoint = 'A07'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/,'A07')
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
   """
   zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
   """
@@ -621,7 +621,7 @@ process ssjTsv2bed {
 
   script:
   endpoint = 'E06'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/, endpoint)
   """
   tsv2bed.pl < ${ssj} -extra 2,3,4,5,6,7 > ${prefix}.bed
   """
@@ -639,7 +639,7 @@ process sscTsv2bed {
 
   script:
   endpoint = 'E06'
-  prefix = ssc.name.replace(/.tsv/,'').replace(/A06/,'E06')
+  prefix = ssc.name.replace(/.tsv/,'').replace(/A06/, endpoint)
   """
   tsv2bed.pl < ${ssc} -extra 2 -ssc > ${prefix}.bed
   """
@@ -657,7 +657,7 @@ process tsv2gff {
 
   script:
   endpoint = 'E06'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/,'E06')
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06/, endpoint)
   """
   tsv2gff.pl < ${ssj} -o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7 > ${prefix}.gff
   """
