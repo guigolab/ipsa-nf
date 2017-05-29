@@ -88,7 +88,7 @@ log.info ""
 if (params.genome =~ /.fa$/) {
   process genomeIndex {
     input:
-    file genome from Channel.fromPath(params.genome)
+    file genome from file(params.genome)
 
     output:
     set file("${prefix}.dbx"), file("${prefix}.idx") into genomeIdx
@@ -100,14 +100,13 @@ if (params.genome =~ /.fa$/) {
     """
   }
 } else {
-  genomeIdx = Channel.create()
-  genomeIdx << [file("${params.genome}.dbx"), file("${params.genome}.idx")]
+  genomeIdx = Channel.value [file("${params.genome}.dbx"), file("${params.genome}.idx")]
 }
 
 if (params.annot =~ /.g[tf]f$/) {
   process txElements {
     input:
-    file annotation from Channel.fromPath(params.annot)
+    file annotation from file(params.annot)
 
     output:
     file "${prefix}.gfx" into txIdxAnnotate, txIdxZeta, txIdxZetaMex, txIdxPsicas
@@ -119,7 +118,7 @@ if (params.annot =~ /.g[tf]f$/) {
     """
   }
 } else {
-  Channel.fromPath("${params.annot}")
+  Channel.value file("${params.annot}")
     .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
@@ -224,7 +223,7 @@ process aggregateMex {
 sscA02 = Channel.create()
 ssjA02 = Channel.create()
 
-A02.choice( sscA02, ssjA02 ) {
+A02.choice(sscA02, ssjA02) {
     f = it[1]
     f.name =~ /ssc/ ? 0 : 1
 }
@@ -234,8 +233,8 @@ process annotate {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  set file(genomeDBX), file(genomeIDX) from genomeIdx.first()
-  file annotation from txIdxAnnotate.first()
+  set file(genomeDBX), file(genomeIDX) from genomeIdx
+  file annotation from txIdxAnnotate
   set id, file(ssj) from ssjA02
 
   output:
@@ -496,7 +495,7 @@ process zeta {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  file annotation from txIdxZeta.first()
+  file annotation from txIdxZeta
   set id, file(ssc), file(ssj) from allA06
 
   output:
@@ -515,7 +514,7 @@ process psicas {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  file annotation from txIdxPsicas.first()
+  file annotation from txIdxPsicas
   set id, file(ssj) from ssj4psicasA06
 
   output:
@@ -534,7 +533,7 @@ process zetaMex {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  file annotation from txIdxZetaMex.first()
+  file annotation from txIdxZetaMex
   set id, file(ssc), file(ssj), file(exons) from allMex
 
   output:
