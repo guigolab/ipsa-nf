@@ -11,5 +11,5 @@ test:
     - docker pull guigolab/ipsa-nf@sha256:88e680da318023d2a577893d5c4f0324ad720f83b13830b4e29f2d03f77490bb
     - curl -fsSL get.nextflow.io | bash 
   override:
-    - ./nextflow run .
-    - bash -x validate-ci.sh
+    - ./ci run
+    - (set -x && ./ci validate)
