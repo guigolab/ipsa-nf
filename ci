@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+OUT_DIR=data
+
+case "$1" in
+  test)
+    echo "Running test pipeline..." >&2
+    nextflow run . -resume
+    ;;
+  validate)
+    echo "Validating test results..." >&2
+    md5sum -c ${OUT_DIR}/md5s.txt
+    ;;
+  cleanup)
+	echo "Cleaning up test results..." >&2
+    find ${OUT_DIR} -type l -exec rm {} \+
+    find ${OUT_DIR} -type d -empty -exec rmdir {} \+
+    ;;
+  *)
+    echo "Usage: run {test|validate|cleanup}" >&2
+    exit 1
+esac
