@@ -378,12 +378,13 @@ process idrMex {
   set id, file(tsv) from D03
 
   output:
-  file "${id}.${endpoint}.ssj.tsv" into D06
+  set id, file("${prefix}.tsv") into D06
 
   script:
   endpoint = 'D06'
+  prefix = "${id}.${endpoint}.mex"
   """
-  idr4sj.pl ${tsv} > ${id}.${endpoint}.mex.tsv
+  idr4sj.pl ${tsv} > ${prefix}.tsv
   """
 }
 
@@ -442,12 +443,9 @@ ssc4merge.toSortedList { a,b -> a[0] <=> b[0] }
 }.into {ssc4mergeSplit}
 
 if ( params.microexons ) {
-  allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupBy { f ->
-     f.baseName.replaceAll(/\.(A06\.ss[cj]|D06)/,'')
-  }.map { m ->
-      m.values().collect { it.sort { it.baseName } }
+  allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupTuple().map { g ->
+    [ g[0], g[1].sort { it.baseName } ].flatten()
   }
-  .flatMap()
   allA06 = Channel.empty()
 } else {
   allA06 = ssj4allA06.phase(ssc4allA06).map { it ->
@@ -530,13 +528,42 @@ process psicas {
   """
 }
 
-A07.toSortedList { a,b -> a[0] <=> b[0] }
-.map { list ->
-  ids = []
-  gffs = []
-  list.each { ids << it[0]; gffs << it[1] }
-  [ids, gffs]
-}.into {A074merge}
+process zetaMex {
+  
+  publishDir "${params.dir}/${endpoint}"
+
+  input:
+  file annotation from txIdxZetaMex.first()
+  set id, file(ssc), file(ssj), file(exons) from allMex
+
+  output:
+  set id, file("${prefix}.gff") into A07mex
+
+  script:
+  endpoint = 'A07'
+  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
+  """
+  zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
+  """
+}
+
+if ( params.microexons ) {
+  A07mex.toSortedList { a,b -> a[0] <=> b[0] }
+  .map { list ->
+    ids = []
+    gffs = []
+    list.each { ids << it[0]; gffs << it[1] }
+    [ids, gffs]
+  }.into {A074merge}
+} else {
+  A07.toSortedList { a,b -> a[0] <=> b[0] }
+  .map { list ->
+    ids = []
+    gffs = []
+    list.each { ids << it[0]; gffs << it[1] }
+    [ids, gffs]
+  }.into {A074merge}
+}
 
 B07.toSortedList { a,b -> a[0] <=> b[0] }
 .map { list ->
@@ -588,26 +615,6 @@ process mergeGFFpsicas {
   transf = 'log'
   template 'merge_gff.pl'
 }
-
-process zetaMex {
-  
-  publishDir "${params.dir}/${endpoint}"
-
-  input:
-  file annotation from txIdxZetaMex.first()
-  set file(ssc), file(ssj), file(exons) from allMex
-
-  output:
-  file "${prefix}.gff" into A07mex
-
-  script:
-  endpoint = 'A07'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
-  """
-  zeta.pl -annot ${annotation} -ssc ${ssc} -ssj ${ssj} -exons ${exons} -mincount ${params.mincount} > ${prefix}.gff 
-  """
-}
-
 
 process ssjTsv2bed {
 
