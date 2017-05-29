@@ -123,8 +123,9 @@ if (params.annot =~ /.g[tf]f$/) {
     .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
-bams = Channel
+Channel
   .from(TsvIndexFile.parse(file(params.index)))
+  .into { bams } 
 
 process preprocBams {
   input:
@@ -220,12 +221,12 @@ process aggregateMex {
   """
 }
 
-ssjA02 = Channel.create()
 sscA02 = Channel.create()
+ssjA02 = Channel.create()
 
-A02.choice( ssjA02, sscA02 ) { it ->
+A02.choice( sscA02, ssjA02 ) {
     f = it[1]
-    f.name =~ /ssj/ ? 0 : 1
+    f.name =~ /ssc/ ? 0 : 1
 }
 
 process annotate {
@@ -266,15 +267,15 @@ process chooseStrand {
   """
 }
 
-constrain = ssj4constrain.phase(sscA02)
-.map { it -> 
-  [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
+constrain = ssj4constrain.combine(sscA02, by: 0)
+.map { 
+  [it[0]] + it[1..-1].sort { it.baseName }
 }
 
 if ( params.microexons ) {
-  constrainMult = ssj4constrainMult.phase(D01)
-  .map { it -> 
-    [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
+  constrainMult = ssj4constrainMult.combine(D01, by: 0)
+  .map { 
+    [it[0]] + it[1..-1].sort { it.baseName }
   }
 } else {
   constrainMult = Channel.empty()
@@ -443,15 +444,15 @@ ssc4merge.toSortedList { a,b -> a[0] <=> b[0] }
 }.into {ssc4mergeSplit}
 
 if ( params.microexons ) {
-  allMex = ssj4allA06.mix(ssc4allA06).mix(D06).groupTuple().map { g ->
-    [ g[0], g[1].sort { it.baseName } ].flatten()
-  }
-  allA06 = Channel.empty()
+  ssj4allA06.combine(ssc4allA06, by: 0).combine(D06, by: 0).map {
+    [it[0]] + it[1..-1].sort { it.baseName }
+  }.into { allMex }
+  Channel.empty().into { allA06 }
 } else {
-  allA06 = ssj4allA06.phase(ssc4allA06).map { it ->
-    [it[0][0], it.collect { it[1] }.sort { it.baseName }].flatten()
-  }
-  allMex = Channel.empty()
+  ssj4allA06.combine(ssc4allA06, by: 0).map {
+    [it[0]] + it[1..-1].sort { it.baseName }
+  }.into { allA06 }
+  Channel.empty().into { allMex }
 }
 
 process mergeTsvSSJ {
