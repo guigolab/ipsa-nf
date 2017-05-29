@@ -100,7 +100,7 @@ if (params.genome =~ /.fa$/) {
     """
   }
 } else {
-  genomeIdx = Channel.value [file("${params.genome}.dbx"), file("${params.genome}.idx")]
+  genomeIdx = Channel.value([file("${params.genome}.dbx"), file("${params.genome}.idx")])
 }
 
 if (params.annot =~ /.g[tf]f$/) {
@@ -118,7 +118,7 @@ if (params.annot =~ /.g[tf]f$/) {
     """
   }
 } else {
-  Channel.value file("${params.annot}")
+  Channel.value(file("${params.annot}"))
     .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
