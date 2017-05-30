@@ -19,6 +19,6 @@ case "$1" in
     find ${OUT_DIR} -type d -empty -exec rmdir {} \+
     ;;
   *)
-    echo "Usage: run {run|validate|cleanup}" >&2
+    echo "Usage: ci {run|validate|cleanup}" >&2
     exit 1
 esac
