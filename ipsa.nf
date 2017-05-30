@@ -100,7 +100,8 @@ if (params.genome =~ /.fa$/) {
     """
   }
 } else {
-  genomeIdx = Channel.value([file("${params.genome}.dbx"), file("${params.genome}.idx")])
+  Channel.value([file("${params.genome}.dbx"), file("${params.genome}.idx")])
+    .set{ genomeIdx }
 }
 
 if (params.annot =~ /.g[tf]f$/) {
@@ -119,12 +120,12 @@ if (params.annot =~ /.g[tf]f$/) {
   }
 } else {
   Channel.value(file("${params.annot}"))
-    .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
+    .set { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
 Channel
   .from(TsvIndexFile.parse(file(params.index)))
-  .into { bams } 
+  .set { bams } 
 
 process preprocBams {
   input:
@@ -220,8 +221,8 @@ process aggregateMex {
   """
 }
 
-sscA02 = Channel.create()
-ssjA02 = Channel.create()
+Channel.create().set { sscA02 }
+Channel.create().set { ssjA02 }
 
 A02.choice(sscA02, ssjA02) {
     f = it[1]
@@ -266,18 +267,19 @@ process chooseStrand {
   """
 }
 
-constrain = ssj4constrain.combine(sscA02, by: 0)
-.map { 
-  [it[0]] + it[1..-1].sort { it.baseName }
-}
-
-if ( params.microexons ) {
-  constrainMult = ssj4constrainMult.combine(D01, by: 0)
+ssj4constrain.combine(sscA02, by: 0)
   .map { 
     [it[0]] + it[1..-1].sort { it.baseName }
-  }
+  }.set{ constrain }
+
+if ( params.microexons ) {
+  ssj4constrainMult.combine(D01, by: 0)
+    .map { 
+      [it[0]] + it[1..-1].sort { it.baseName }
+    }.set { constrainMult }
 } else {
-  constrainMult = Channel.empty()
+  Channel.empty()
+    .set { constrainMult }
 }
 
 process constrainSSC {
@@ -427,31 +429,33 @@ process sscA06 {
 }
 
 ssj4merge.toSortedList { a,b -> a[0] <=> b[0] }
-.map { list ->
-  ids = []
-  ssjs = []
-  list.each { ids << it[0]; ssjs << it[1] }
-  [ids, ssjs]
-}.into {ssj4mergeSplit}
+  .map { list ->
+    ids = []
+    ssjs = []
+    list.each { ids << it[0]; ssjs << it[1] }
+    [ids, ssjs]
+  }.set { ssj4mergeSplit }
 
 ssc4merge.toSortedList { a,b -> a[0] <=> b[0] }
-.map { list ->
-  ids = []
-  sscs = []
-  list.each { ids << it[0]; sscs << it[1] }
-  [ids, sscs]
-}.into {ssc4mergeSplit}
+  .map { list ->
+    ids = []
+    sscs = []
+    list.each { ids << it[0]; sscs << it[1] }
+    [ids, sscs]
+  }.set { ssc4mergeSplit }
 
 if ( params.microexons ) {
-  ssj4allA06.combine(ssc4allA06, by: 0).combine(D06, by: 0).map {
-    [it[0]] + it[1..-1].sort { it.baseName }
-  }.into { allMex }
-  Channel.empty().into { allA06 }
+  ssj4allA06.combine(ssc4allA06, by: 0).combine(D06, by: 0)
+    .map {
+      [it[0]] + it[1..-1].sort { it.baseName }
+    }.set { allMex }
+  Channel.empty().set { allA06 }
 } else {
-  ssj4allA06.combine(ssc4allA06, by: 0).map {
-    [it[0]] + it[1..-1].sort { it.baseName }
-  }.into { allA06 }
-  Channel.empty().into { allMex }
+  ssj4allA06.combine(ssc4allA06, by: 0)
+    .map {
+      [it[0]] + it[1..-1].sort { it.baseName }
+    }.set { allA06 }
+  Channel.empty().set { allMex }
 }
 
 process mergeTsvSSJ {
@@ -549,29 +553,29 @@ process zetaMex {
 
 if ( params.microexons ) {
   A07mex.toSortedList { a,b -> a[0] <=> b[0] }
-  .map { list ->
-    ids = []
-    gffs = []
-    list.each { ids << it[0]; gffs << it[1] }
-    [ids, gffs]
-  }.into {A074merge}
+    .map { list ->
+      ids = []
+      gffs = []
+      list.each { ids << it[0]; gffs << it[1] }
+      [ids, gffs]
+    }.set { A074merge }
 } else {
   A07.toSortedList { a,b -> a[0] <=> b[0] }
-  .map { list ->
-    ids = []
-    gffs = []
-    list.each { ids << it[0]; gffs << it[1] }
-    [ids, gffs]
-  }.into {A074merge}
+    .map { list ->
+      ids = []
+      gffs = []
+      list.each { ids << it[0]; gffs << it[1] }
+      [ids, gffs]
+    }.set { A074merge }
 }
 
 B07.toSortedList { a,b -> a[0] <=> b[0] }
-.map { list ->
-  ids = []
-  gffs = []
-  list.each { ids << it[0]; gffs << it[1] }
-  [ids, gffs]
-}.into {B074merge}
+  .map { list ->
+    ids = []
+    gffs = []
+    list.each { ids << it[0]; gffs << it[1] }
+    [ids, gffs]
+  }.set { B074merge }
 
 process mergeGFFzeta {
   publishDir "${params.dir}"
