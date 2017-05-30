@@ -120,7 +120,7 @@ if (params.annot =~ /.g[tf]f$/) {
   }
 } else {
   Channel.value(file("${params.annot}"))
-    .set { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
+    .into { txIdxAnnotate; txIdxZeta; txIdxZetaMex; txIdxPsicas }
 }
 
 Channel
