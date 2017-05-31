@@ -8,6 +8,7 @@ LABEL maintainer "Emilio Palumbo <emilio.palumbo@crg.eu>" \
 RUN apt-get update --fix-missing -qq && apt-get install -y -q \
     curl \ 
     wget \
+    gawk \
     build-essential \
     zlib1g-dev \
     libncurses5-dev  \
