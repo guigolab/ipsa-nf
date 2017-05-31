@@ -12,7 +12,6 @@ params.deltaSS = 10
 params.dir = 'data'
 params.entropy = 1.5
 params.group = 'labExpId'
-params.idr = 0.1
 params.margin = 5
 params.merge = "all"
 params.mincount = 10
@@ -41,7 +40,6 @@ if (params.help) {
   log.info '--dir DIRECTORY           the output directory, obligatory'
   log.info '--entropy ENTROPY         entropy lower threshold, default=1.5'
   log.info '--group GROUP             the grouping field for IDR, default=labExpId'
-  log.info '--idr IDR                 IDR upper threshold, default=0.1'
   log.info '--margin MARGIN           margin for aggregate, default=5'
   log.info '--merge MERGE             the name of the output to merge in case if blocks are missing, default=all'
   log.info '--mincount MIN_COUNT      min number of counts for the denominator, default=10'
@@ -74,7 +72,6 @@ log.info "Splice sites distance threshold    : ${params.deltaSS}"
 log.info "Output dir                         : ${params.dir}"
 log.info "Entropy lowewr threshold           : ${params.entropy}"
 log.info "Grouping field                     : ${params.group}"
-log.info "IDR upper threshold                : ${params.idr}"
 log.info "Margin for aggregate               : ${params.margin}"
 log.info "Merge output name                  : ${params.merge}"
 log.info "Minimum counts for denominator     : ${params.mincount}"
@@ -149,13 +146,13 @@ process sjcount {
   set sample, id, file(bam), type, view, readType, readStrand, readLength from bamsWreadLength
 
   output:
-  set id, val(1), file("${prefix}.A01.ssj.tsv"), readLength into A01ssc
-  set id, val(0), file("${prefix}.A01.ssc.tsv"), readLength into A01ssj
-  set id, val(2), file("${prefix}.A01.ssj.tsv") into A01mex
+  set id, file("${prefix}.ssc.tsv"), readLength into A01ssc
+  set id, file("${prefix}.ssj.tsv"), readLength into A01ssj
+  set id, file("${prefix}.ssj.tsv") into A01mex
 
   script:
   endpoint = 'A01'
-  prefix = bam.name.replace(/.bam/,'')
+  prefix = "${id}.${endpoint}"
   def strandParams
   switch (readStrand) {
     case'SENSE':
@@ -173,8 +170,8 @@ process sjcount {
   }
   """
   sjcount -bam ${bam} \
-          -ssc ${prefix}.A01.ssc.tsv \
-          -ssj ${prefix}.A01.ssj.tsv \
+          -ssc ${prefix}.ssc.tsv \
+          -ssj ${prefix}.ssj.tsv \
           -nbins ${readLength} \
           ${strandParams} \
           ${params.param ?: ''} \
@@ -182,21 +179,41 @@ process sjcount {
   """
 }
 
-process aggregate {
+process aggregateSSC {
   
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  set id, splits, file(tsv), readLength from A01ssc.mix(A01ssj)
+  set id, file(tsv), readLength from A01ssc
 
   output:
-  set id, file("${prefix}.tsv") into A02
+  set id, file("${prefix}.tsv") into sscA02
 
   script:
+  degree = 0
   endpoint = 'A02'
-  prefix = tsv.name.replace(/.tsv/,'').replace(/A01/,'A02')
+  prefix = "${id}.${endpoint}.ssc"
   """
-  awk '\$2==${splits}' ${tsv} | agg.pl -readLength ${readLength} -margin ${params.margin} -logfile ${prefix}.log > ${prefix}.tsv 
+  aggregate.awk -v degree=${degree} -v readLength=${readLength} -v margin=${params.margin} -v prefix= -v logfile=${prefix}.log ${tsv} > ${prefix}.tsv
+  """
+}
+
+process aggregateSSJ {
+  
+  publishDir "${params.dir}/${endpoint}"
+
+  input:
+  set id, file(tsv), readLength from A01ssj
+
+  output:
+  set id, file("${prefix}.tsv") into ssjA02
+
+  script:
+  degree = 1
+  endpoint = 'A02'
+  prefix = "${id}.${endpoint}.ssj"
+  """
+  aggregate.awk -v degree=${degree} -v readLength=${readLength} -v margin=${params.margin} -v prefix= -v logfile=${prefix}.log ${tsv} > ${prefix}.tsv
   """
 }
 
@@ -205,7 +222,7 @@ process aggregateMex {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  set id, splits, file(tsv) from A01mex
+  set id, file(tsv) from A01mex
 
   when:
   params.microexons
@@ -214,19 +231,12 @@ process aggregateMex {
   set id, file("${prefix}.tsv") into D01
 
   script:
+  degree = 2
   endpoint = 'D01'
   prefix = tsv.name.replace(/.tsv/,'').replace(/A01.ssj/,'D01')
   """
-  awk '\$2==${splits}' ${tsv} | agg.pl -logfile ${prefix}.log > ${prefix}.tsv 
+  aggregate.awk -v degree=${degree} -v logfile=${prefix}.log ${tsv} > ${prefix}.tsv
   """
-}
-
-Channel.create().set { sscA02 }
-Channel.create().set { ssjA02 }
-
-A02.choice(sscA02, ssjA02) {
-    f = it[1]
-    f.name =~ /ssc/ ? 0 : 1
 }
 
 process annotate {
@@ -243,7 +253,7 @@ process annotate {
 
   script:
   endpoint = 'A03'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A02/,'A03')
+  prefix = "${id}.${endpoint}.ssj"
   """
   annotate.pl -annot ${annotation} -dbx ${genomeDBX} -idx ${genomeIDX} -deltaSS ${params.deltaSS} -in ${ssj} > ${prefix}.tsv
   """
@@ -261,9 +271,9 @@ process chooseStrand {
 
   script:
   endpoint = 'A04'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A03/,'A04')
+  prefix = "${id}.${endpoint}.ssj"
   """
-  choose_strand.pl - < ${ssj} -logfile ${prefix}.log > ${prefix}.tsv
+  choose_strand.awk ${ssj} > ${prefix}.tsv
   """
 }
 
@@ -294,9 +304,9 @@ process constrainSSC {
 
   script:
   endpoint = 'A04'
-  prefix = ssc.name.replace(/.tsv/,'').replace(/A02/,'A04')
+  prefix = "${id}.${endpoint}.ssc"
   """
-  constrain_ssc.pl -ssj ${ssj} < ${ssc} > ${prefix}.tsv  
+  constrain_ssc.awk -v jncfile=${ssj} ${ssc} > ${prefix}.tsv
   """
 }
 
@@ -312,9 +322,9 @@ process constrainMex {
 
   script:
   endpoint = 'D02'
-  prefix = ssjMex.name.replace(/.tsv/,'').replace(/D01/,'D02')
+  prefix = "${id}.${endpoint}"
   """
-  constrain_mult.pl -ssj ${ssj} < ${ssjMex} > ${prefix}.tsv
+  constrain_mex.awk -v jncfile=${ssj} ${ssjMex} > ${prefix}.tsv
   """
 }
 
@@ -326,86 +336,13 @@ process extractMex {
   set id, file(ssjMex) from D02
 
   output:
-  set id, file("${prefix}.tsv") into D03
-
-  script:
-  endpoint = 'D03'
-  prefix = ssjMex.name.replace(/.tsv/,'').replace(/D02/,'D03')
-  """
-  extract_mex.pl < ${ssjMex} > ${prefix}.tsv
-  """
-}
-
-process ssjIDR {
-
-  publishDir "${params.dir}/${endpoint}"
-  
-  input:
-  set id, file(tsv) from ssjA04
-
-  output:
-  set id, file("${prefix}.tsv") into ssjA05
-
-  script:
-  endpoint = 'A05'
-  prefix = "${id}.${endpoint}.ssj"
-  """
-  idr4sj.pl ${tsv} > ${prefix}.tsv
-  """
-}
-
-process sscIDR {
-
-  publishDir "${params.dir}/${endpoint}"
-  
-  input:
-  set id, file(tsv) from sscA04
-
-  output:
-  set id, file("${prefix}.tsv") into sscA05
-
-  script:
-  endpoint = 'A05'
-  prefix = "${id}.${endpoint}.ssc"
-  """
-  idr4sj.pl ${tsv} > ${prefix}.tsv
-  """
-}
-
-process idrMex {
-
-  publishDir "${params.dir}/${endpoint}"
-
-  input:
-  set id, file(tsv) from D03
-
-  output:
   set id, file("${prefix}.tsv") into D06
 
   script:
   endpoint = 'D06'
-  prefix = "${id}.${endpoint}.mex"
+  prefix = "${id}.${endpoint}"
   """
-  idr4sj.pl ${tsv} > ${prefix}.tsv
-  """
-}
-
-process ssjA06 {
-
-  publishDir "${params.dir}/${endpoint}"
-
-  input:
-  set id, file(ssj) from ssjA05
-
-  output:
-  file "${prefix}.tsv" into ssjA06, ssj4gffA06
-  set id, file("${prefix}.tsv") into ssj4merge, ssj4allA06, ssj4psicasA06
-
-  script:
-  endpoint = 'A06'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A05/,'A06')
-  """
-  awk '\$4>=${params.entropy} && \$5>=${params.status} && \$7<${params.idr}' ${ssj} > ${prefix}.tsv
+  extract_mex.awk ${ssjMex} > ${prefix}.tsv 
   """
 }
 
@@ -414,7 +351,7 @@ process sscA06 {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  set id, file(ssc) from sscA05
+  set id, file(ssc) from sscA04
 
   output:
   file "${prefix}.tsv" into sscA06
@@ -422,9 +359,28 @@ process sscA06 {
 
   script:
   endpoint = 'A06'
-  prefix = ssc.name.replace(/.tsv/,'').replace(/A05/,'A06')
+  prefix = "${id}.${endpoint}.ssc"
   """
-  awk '\$4>=${params.entropy} && \$7<${params.idr}' ${ssc} > ${prefix}.tsv
+  awk '\$4>=${params.entropy}' ${ssc} > ${prefix}.tsv
+  """
+}
+
+process ssjA06 {
+
+  publishDir "${params.dir}/${endpoint}"
+
+  input:
+  set id, file(ssj) from ssjA04
+
+  output:
+  file "${prefix}.tsv" into ssjA06, ssj4gffA06
+  set id, file("${prefix}.tsv") into ssj4merge, ssj4allA06, ssj4psicasA06
+
+  script:
+  endpoint = 'A06'
+  prefix = "${id}.${endpoint}.ssj"
+  """
+  awk '\$4>=${params.entropy} && \$5>=${params.status}' ${ssj} > ${prefix}.tsv
   """
 }
 
@@ -587,14 +543,19 @@ process mergeGFFzeta {
   file "${prefix}.psi.tsv"
   file "${prefix}.psi3.tsv"
   file "${prefix}.psi5.tsv"
+  file "${prefix}.psit.tsv"
   file "${prefix}.cosi.tsv"
   file "${prefix}.cosi3.tsv"
   file "${prefix}.cosi5.tsv"
+  file "${prefix}.cosit.tsv"
+  file "${prefix}.exc.tsv"
+  file "${prefix}.inc.tsv"
+  file "${prefix}.ret.tsv"
 
   shell:
   prefix = "${params.merge}.A"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  features = ['cosi', 'cosi3', 'cosi5', 'psi', 'psi3', 'psi5']
+  features = ['cosi', 'cosi3', 'cosi5', 'cosit', 'psi', 'psi3', 'psi5', 'psit', 'exc', 'inc', 'ret']
   output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
   percent = 0.25
   transf = 'log'
@@ -609,11 +570,12 @@ process mergeGFFpsicas {
 
   output:
   file "${prefix}.psicas.tsv"
+  file "${prefix}.psiloc.tsv"
 
   shell:
   prefix = "${params.merge}.B"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  features = ['psicas']
+  features = ['psicas', 'psiloc']
   output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
   percent = 0.25
   transf = 'log'
