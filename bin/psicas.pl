@@ -36,14 +36,35 @@ foreach $chr(sort keys(%{$elem{exon}})) {
     foreach $str(sort keys(%{$elem{exon}{$chr}})) {
 	foreach $x(sort{$a<=>$b} keys(%{$elem{exon}{$chr}{$str}})) {
 	    foreach $y(sort{$a<=>$b} keys(%{$elem{exon}{$chr}{$str}{$x}})) {
+		foreach $a(sort{$a<=>$b} keys(%{$mele{intron}{$chr}{$str}{$x}})) {
+		    foreach $b(sort {$a<=>$b} keys(%{$elem{intron}{$chr}{$str}{$y}})) {
+			next unless($elem{intron}{$chr}{$str}{$a}{$b});
+			$inccas{$chr}{$str}{$x}{$y} += $data{$chr}{$str}{$a}{$x} + $data{$chr}{$str}{$y}{$b};
+			$exccas{$chr}{$str}{$x}{$y} += $data{$chr}{$str}{$a}{$b};
+		    }
+		}
 		$a = (sort {$a<=>$b} keys(%{$mele{intron}{$chr}{$str}{$x}}))[-1];
-		$b = (sort {$a<=>$b} keys(%{$elem{intron}{$chr}{$str}{$y}}))[0];
-		next unless($elem{intron}{$chr}{$str}{$a}{$b});
-		$inc = $data{$chr}{$str}{$a}{$x} + $data{$chr}{$str}{$y}{$b} + 0;
-		$exc = $data{$chr}{$str}{$a}{$b} + 0;
-		$psi  = frac($inc, 2*$exc);
-		next unless($psi =~ /\d/);
-        	print join("\t", $chr, 'SJPIPE', 'exon', $x, $y, int(1000*$psi), $str, '.', set_attributes(psicas=>$psi,inc=>$inc,exc=>$exc)), "\n";
+                $b = (sort {$a<=>$b} keys(%{$elem{intron}{$chr}{$str}{$y}}))[0];
+                next unless($elem{intron}{$chr}{$str}{$a}{$b});
+                $incloc{$chr}{$str}{$x}{$y} = $data{$chr}{$str}{$a}{$x} + $data{$chr}{$str}{$y}{$b} + 0;
+                $excloc{$chr}{$str}{$x}{$y} = $data{$chr}{$str}{$a}{$b} + 0;
+	    }
+	}
+    }
+}
+
+foreach $chr(sort keys(%{$elem{exon}})) {
+    foreach $str(sort keys(%{$elem{exon}{$chr}})) {
+        foreach $x(sort{$a<=>$b} keys(%{$elem{exon}{$chr}{$str}})) {
+            foreach $y(sort{$a<=>$b} keys(%{$elem{exon}{$chr}{$str}{$x}})) {
+		$inccas = $inccas{$chr}{$str}{$x}{$y};
+		$exccas = $exccas{$chr}{$str}{$x}{$y};
+		$psicas  = frac($inccas, 2*$exccas);
+                $incloc = $incloc{$chr}{$str}{$x}{$y};
+                $excloc = $excloc{$chr}{$str}{$x}{$y};
+                $psiloc  = frac($incloc, 2*$excloc);
+		next unless($psicas =~ /\d/ || $psiloc =~ /\d/);
+        	print join("\t", $chr, 'SJPIPE', 'exon', $x, $y, int(1000*$psicas), $str, '.', set_attributes(psicas=>$psicas,psiloc=>$psiloc,inccas=>$inccas,exccas=>$exccas,incloc=>$incloc,$excloc=>$excloc)), "\n";
 	    }
 	}
     }

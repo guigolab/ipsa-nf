@@ -17,7 +17,7 @@ foreach $file(keys(%input)) {
         $id = "$chr\_$beg\_$end\_$str";
 	%attr = get_attributes($attr);
 	foreach $key(keys(%output)) {
-	    next unless($attr{$key});
+	    next unless($attr{$key}=~/\w/);
 	    $data{$key}{$name}{$id} = $attr{$key};
 	    $rows{$key}{$id}++;
 	    $cols{$key}{$name}++;
@@ -41,7 +41,7 @@ foreach $key(sort keys(%output)) {
             push @arr, $value =~/\d/ ? $value : "NA";
             $num++ if($value =~/\d/);
         }
-        print FILE join("\t", @arr), "\n" if($num>$percent*@c);
+        print FILE join("\t", @arr), "\n" if($num>=$percent*@c);
     }
     close FILE;
     print STDERR "]\n";

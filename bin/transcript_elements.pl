@@ -66,7 +66,7 @@ foreach $tid(keys(%exons)) {
     }
 }
 
-print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]" if($trans_spliced);
+print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]\n" if($trans_spliced);
 
 print STDERR "[>stdout";
 foreach $key(sort keys(%feature)) {

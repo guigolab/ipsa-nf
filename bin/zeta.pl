@@ -70,6 +70,7 @@ if(-r $annot) {
     	$r = $index{$chr}{$str}{$end};
     	push @{$lb[$l]}, $e;
     	push @{$rb[$r]}, $e;
+	$source{$e}{$source}++;
     }
     close FILE;
     print STDERR "] ", 0+keys(%been), "\n";
@@ -88,6 +89,7 @@ if(-r $exons) {
 	$r = $index{$chr}{$str}{$end};
 	push @{$lb[$l]}, $e;
 	push @{$rb[$r]}, $e;
+	$source{$e}{MINIEX}++;
     }
     close FILE;
     print STDERR "] ", 0+keys(%been), "\n";
@@ -163,7 +165,7 @@ for($j=1;$j<=$n;$j++) {
 	$cosi = frac($inc + 2*$exc, $ret);
 	($chr, $beg, $end, $s) = split /\_/, $e;
 	next unless(join(undef, $psi, $cosi) =~ /\d/);
-	print join("\t", $chr, 'SJPIPE', 'exon', $beg, $end, int(1000*$psi), $s, '.', set_attributes(psi=>$psi, cosi=>$cosi, inc=>$inc, exc=>$exc, ret=>$ret)), "\n";
+	print join("\t", $chr, join(",",keys(%{$source{$e}})), 'exon', $beg, $end, int(1000*$psi), $s, '.', set_attributes(psi=>$psi, cosi=>$cosi, inc=>$inc, exc=>$exc, ret=>$ret)), "\n";
     }
 }
 foreach $chr(sort keys(%count53)) {
@@ -177,12 +179,14 @@ foreach $chr(sort keys(%count53)) {
                 $nA = $count00{$chr}{$str}{$end} + 0;
                 $psi5  = frac($nDA, $nDX);
                 $psi3  = frac($nDA, $nXA);
+		$psit  = frac(2*$nDA, $nDX + $nXA);
                 $cosi5 = frac($nDA + $nDX, $nD);
                 $cosi3 = frac($nDA + $nXA, $nA);
+		$cosit = frac(2*$nDA, $nD + $nA);
 		next unless(join(undef, $psi5,$psi3,$cosi5,$cosi3) =~ /\d/);
 		($x, $y) = sort {$a<=>$b} ($beg, $end);
                 print join("\t", $chr, 'SJPIPE', 'intron', $x, $y, $psi5=~/\d/ ? int(500*($psi5 + $psi3)) : '.', strand_i2c($str), '.',
-                        set_attributes(psi5=>$psi5, psi3=>$psi3, cosi5=>$cosi5, cosi3=>$cosi3, nDA=>$nDA, nDX=>$nDX, nXA=>$nXA, nD=>$nD, nA=>$nA)), "\n";
+                        set_attributes(psi5=>$psi5, psi3=>$psi3, psit=>$psit, cosi5=>$cosi5, cosi3=>$cosi3, cosit=>$cosit, nDA=>$nDA, nDX=>$nDX, nXA=>$nXA, nD=>$nD, nA=>$nA)), "\n";
             }
         }
     }

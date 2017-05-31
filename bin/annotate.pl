@@ -9,10 +9,9 @@ if(@ARGV==0) {
 
 parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'input not specified'},
 			annot	=> {description=>'the annotation (gtf)', ifunreadable=>'annotation not specified'}, 
-			dbx	=> {description=>'the genome (dbx)', ifunreadable=>'dbx not specified'},
-                        idx     => {description=>'the genome (idx)', ifunreadable=>'idx not specified'},
-			deltaSS => {description=>'distance threshold for splice sites', default=>0},
-			logfile => {description=>'name of the log file'});
+			dbx	    => {description=>'the genome (dbx)', ifunreadable=>'dbx not specified'},
+            idx     => {description=>'the genome (idx)', ifunreadable=>'idx not specified'},
+			deltaSS => {description=>'distance threshold for splice sites', default=>0});
 
 
 read_junctions($in);
@@ -36,22 +35,10 @@ while($line=<FILE>) {
 	    $nucl   = "NA" unless($nucl);
 	    $nucl =~ tr/[a-z]/[A-Z]/;
 	    print join("\t", $id, $count, $rest, $status, $nucl), "\n";
-	    $stat1{$status}{$nucl}++;
-	    $stat2{$status}{$nucl}+=$count;
 	}
     }
 }
 close FILE;
-
-if($logfile) {
-    open FILE, ">$logfile";
-    foreach $status(sort keys(%stat1)) {
-	foreach $nucl(sort keys(%{$stat1{$status}})) {
-	    print FILE join("\t", $logfile, $status, $nucl, $stat1{$status}{$nucl}, $stat2{$status}{$nucl});
-	}
-    }
-    close FILE;
-}
 
 #################################################################################################################################################################
 
@@ -103,8 +90,6 @@ sub index_ss {
         $SS_prev{$key}{$arr[-1]} = $arr[-2];
     }
 }
-
-#################################################################################################################################################################
 
 sub call_site {
     my ($type, $chr, $pos, $str) = @_;

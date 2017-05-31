@@ -7,7 +7,7 @@ if(@ARGV==0) {
 
 parse_command_line(minus =>{description => 'base to subtract from the coordinates', default=>0},
 		   source=>{description => 'the source field',default=>'IPSA'},
-		   o     =>{description => 'hash, attr name >> column number', array=>hash});
+		   o     =>{description => 'hash, attr name >> column number}', array=>hash});
 
 %fields = @o;
 
