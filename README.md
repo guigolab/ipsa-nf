@@ -30,10 +30,10 @@ Launch the test pipeline with the following command:
 
 ## Pipeline usage
 
-Caling the pipeline with the `--help ` parameter shows the help message:
+Launching the pipeline with the `--help ` parameter shows the help message:
 
 ```
-$ nextflow run ipsa-nf --help
+nextflow run ipsa-nf --help
 ```
 
 ```
@@ -64,16 +64,21 @@ Options:
 
 ## Input format
 
-IPSA-nf takes as input a tab separated file containing information about the input data. The file must be specified using the parameter `--index`. The format of the index file is as follows:
+IPSA-nf takes as input a tab separated file containing information about the input data. The file must be specified using the `--index` parameter. The format of the index file is as follows:
 
 1. sample identifier
 2. path to the bam file to be processed
-3. library type (`Single-End` vs `Paired-End`)
-4. strandnesss of the data (`NONE` for unstranded, `SENSE`/`ANTISENSE` for `Single-End` stranded, `MATE1_SENSE`/`MATE2_SENSE` for `Paired-End` stranded)
+3. library type:
+	* `Single-End`
+	* `Paired-End`
+4. strandnesss of the data:
+	* `NONE` for unstranded
+	* `SENSE`/`ANTISENSE` for `Single-End` stranded
+	* `MATE1_SENSE`/`MATE2_SENSE` for `Paired-End` stranded
 
-Here is an example af an index file:
+Here is an index file example:
 
-```bash
+```
 E14_rep1	E14AlnRep1.sub.bam	Paired-End	MATE2_SENSE
 E14_rep2	E14AlnRep2.sub.bam	Paired-End	MATE2_SENSE
 E18_rep1	E18AlnRep1.sub.bam	Paired-End	MATE2_SENSE
@@ -96,20 +101,22 @@ Output files are organinzed into folders corresponding to the different pipeline
 
 And if `--microexons` is used:
 
-* D01 - aggregated 2-splits
-* D02 - aggregated constrained 2-splits
-* D06 - extracted microexons from constrained 2-splits
+* `D01` - aggregated 2-splits
+* `D02` - aggregated constrained 2-splits
+* `D06` - extracted microexons from constrained 2-splits
 
 ## Requirements
 
 IPSA-nf is configured to run using the [Docker](https://www.docker.com/) container engine by default. See the included 
-[Dockerfile](docker/Dockerfile) for the configuration details. For this only the following dependencies have to be met:
+[Dockerfile](docker/Dockerfile) for the configuration details. 
+
+In order to run the pipeline with Doecker the following dependencies have to be met:
 
 * Java 7/8
 * [Nextflow](https://www.nextflow.io) 0.24.x (or higher)
 * [Docker](https://www.docker.com/) 1.10 (or higher)
 
-The pipeline can also be used without Docker by installing on your system the following software components (natively or by using [Environemnt Modules](http://modules.sourceforge.net/)):
+The pipeline can also be used without Docker by installing the following software components on your system (natively or by using [Environemnt Modules](http://modules.sourceforge.net/)):
 
 * [maptools](https://github.com/pervouchine/maptools)
 * [sjcount](https://github.com/pervouchine/sjcount)
