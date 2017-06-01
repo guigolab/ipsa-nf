@@ -6,31 +6,34 @@ import java.nio.file.Path
  *
  * @author Emilio Palumbo <emiliopalumbo@gmail.com>
  */
-class TsvIndexFile {
-	
+class IPSA {
+
 	/**
-	*	Parse a TSV file with the following format:
-	* 1. merge id
-	* 2. run id
-	* 3. input file path
-	* 4. file type
-	* 5. view
-	* 6. read type
-	* 7. read strand
-	* 7. read length
+	* Define input fields position:
+	* 1. id
+	* 2. path
+	* 3. read type
+	* 4. read strand
 	*/
-	static parse(def f) {
+	class Fields {
+		static final int ID          = 0
+		static final int PATH        = 1
+		static final int READ_TYPE   = 2
+		static final int READ_STRAND = 3
+	}
+
+	/**
+	* Parse the index TSV file as defined in the Fields class:
+	*/
+	static parseIndexFile(def f) {
 		def bams = []
 		f.readLines().each { line ->
 			def list = line.split()
-		  def mergeId = list[0]
-		  def id = list[1]
-		  def path = resolveFile(list[2], f)
-		  def type = list[3]
-		  def view = list[4]
-		  def readType = list[5]
-		  def readStrand = list[6]
-		  bams << [ mergeId, id, path, type, view, readType, readStrand ]
+		  def id = list[Fields.ID]
+		  def path = resolveFile(list[Fields.PATH], f)
+		  def readType = list[Fields.READ_TYPE]
+		  def readStrand = list[Fields.READ_STRAND]
+		  bams << [ id, path, readType, readStrand ]
 		}
 		return bams
 	}
@@ -51,5 +54,5 @@ class TsvIndexFile {
 	  else {
 	    return Nextflow.file(str) 
 	  }
-} 
+	} 
 }

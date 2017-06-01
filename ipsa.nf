@@ -1,5 +1,5 @@
 // library imports
-import TsvIndexFile
+import IPSA
 
 // parameters for test run
 params.index = "${baseDir}/data/index.tsv"
@@ -121,7 +121,7 @@ if (params.annot =~ /.g[tf]f$/) {
 }
 
 Channel
-  .from(TsvIndexFile.parse(file(params.index)))
+  .from(IPSA.parseIndexFile(file(params.index)))
   .set { bams } 
 
 process preprocBams {
