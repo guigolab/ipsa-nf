@@ -51,7 +51,7 @@ if (params.help) {
   log.info 'Run IPSA on a set of data.'
   log.info ''
   log.info 'Usage: '
-  log.info '    ipsa-nf [options]'
+  log.info "    ${workflow.projectDir.baseName} [options]"
   log.info ''
   log.info 'Options:'
   log.info '--index INDEX_FILE        the index file in TSV format'
