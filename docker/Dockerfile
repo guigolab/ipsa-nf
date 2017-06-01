@@ -1,8 +1,8 @@
 FROM debian:stable
 
 LABEL maintainer "Emilio Palumbo <emilio.palumbo@crg.eu>" \
-      version "1.0" \
-      description "IPSA"
+      version "1.1" \
+      description "IPSA-nf"
 
 # install needed tools
 RUN apt-get update --fix-missing -qq && apt-get install -y -q \
