@@ -38,10 +38,6 @@ d9546acd8a7cc64d292b83152b8abe8b *data/A07/E14_rep1.A07.gff
 f7a7d302fdf41b638f151ef9ce174c3a *data/A07/E14_rep2.A07.gff
 df6a78a0701fca2bb7c77d7fe11d55e0 *data/A07/E18_rep1.A07.gff
 3d25f621459e9055e03b49ecc8d37c9a *data/A07/E18_rep2.A07.gff
-51eb0ee93d32beb6ddf2c5d57a39a43f *data/B07/E14_rep1.B07.gff
-ce15dab6744358916548d7c9d9d8ea93 *data/B07/E14_rep2.B07.gff
-fedd10d10eb4138fb389927cfedaed90 *data/B07/E18_rep1.B07.gff
-13182fb99724abcb2fb183cd08e213fe *data/B07/E18_rep2.B07.gff
 d41d8cd98f00b204e9800998ecf8427e *data/D01/E14_rep1.D01.tsv
 d41d8cd98f00b204e9800998ecf8427e *data/D01/E14_rep2.D01.tsv
 d41d8cd98f00b204e9800998ecf8427e *data/D01/E18_rep1.D01.tsv
