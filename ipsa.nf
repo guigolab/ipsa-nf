@@ -33,20 +33,17 @@ if (params.help) {
   log.info '    ipsa.nf [options]'
   log.info ''
   log.info 'Options:'
-  log.info '--index INDEX_FILE        the index file'
-  log.info '--genome GENOME_FILE      the genome file (FASTA)'
-  log.info '--annot ANNOTATION_FILE   the annotation file (gtf)'
-  log.info '--deltaSS DELTA           distance threshold for splice sites, default=10'
-  log.info '--dir DIRECTORY           the output directory, obligatory'
-  log.info '--entropy ENTROPY         entropy lower threshold, default=1.5'
-  log.info '--group GROUP             the grouping field for IDR, default=labExpId'
-  log.info '--margin MARGIN           margin for aggregate, default=5'
-  log.info '--merge MERGE             the name of the output to merge in case if blocks are missing, default=all'
-  log.info '--mincount MIN_COUNT      min number of counts for the denominator, default=10'
-  log.info '--param PARAMS            parameters passed to sjcount'
-  log.info '--repository REPOSITORY   the repository subdirectory for bam files'
-  log.info '--smpid SAMPLE_ID_FIELD   sample id field, default=labExpId'
-  log.info '--status STATUS           annotation status lower threshold, default=0'
+  log.info '--index INDEX_FILE        the index file in TSV format'
+  log.info '--genome GENOME_FILE      the genome file in FASTA format'
+  log.info '--annot ANNOTATION_FILE   the annotation file in gtf format'
+  log.info '--merge MERGE             prefix for merged output files (default: all)'
+  log.info '--dir DIRECTORY           the output directory'
+  log.info '--sjcount-params PARAMS   additional `sjcount` paramters'
+  log.info '--margin MARGIN           margin for aggregate (default: 5)'
+  log.info '--mincount MIN_COUNT      minimum number of counts for denominators when calculationg fractions (default: 10)'
+  log.info '--deltaSS DELTA           distance threshold for splice sites (default: 10)'
+  log.info '--entropy ENTROPY         entropy lower threshold (default: 1.5)'
+  log.info '--status STATUS           annotation status lower threshold (default: 0)'
   log.info '--microexons              include microexons, default=false'
   exit 1
 }
@@ -68,18 +65,18 @@ log.info "------------------"
 log.info "Index file                         : ${params.index}"
 log.info "Genome                             : ${params.genome}"
 log.info "Annotation                         : ${params.annot}"
-log.info "Splice sites distance threshold    : ${params.deltaSS}"
-log.info "Output dir                         : ${params.dir}"
-log.info "Entropy lowewr threshold           : ${params.entropy}"
-log.info "Grouping field                     : ${params.group}"
-log.info "Margin for aggregate               : ${params.margin}"
 log.info "Merge output name                  : ${params.merge}"
-log.info "Minimum counts for denominator     : ${params.mincount}"
-log.info "Sjcount parameters                 : ${params.param ?: '-'}"
-log.info "BAM files repository               : ${params.repository ?: '-'}"
-log.info "Sample id field                    : ${params.smpid}"
-log.info "Annotation status lower threshold  : ${params.status}"
+log.info "Output dir                         : ${params.dir}"
+log.info "Sjcount parameters                 : ${params.sjcountParams ?: '-'}"
 log.info "Include microexons                 : ${params.microexons}"
+log.info ""
+log.info "Thresholds and limits"
+log.info "---------------------"
+log.info "Margin for aggregate               : ${params.margin}"
+log.info "Minimum counts for denominator     : ${params.mincount}"
+log.info "Splice sites distance threshold    : ${params.deltaSS}"
+log.info "Entropy lowewr threshold           : ${params.entropy}"
+log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
 
 if (params.genome =~ /.fa$/) {
@@ -174,7 +171,7 @@ process sjcount {
           -ssj ${prefix}.ssj.tsv \
           -nbins ${readLength} \
           ${strandParams} \
-          ${params.param ?: ''} \
+          ${params.sjcountParams ?: ''} \
           -quiet
   """
 }
@@ -638,13 +635,13 @@ process tsv2gff {
 
 workflow.onComplete {
     log.info """
-    Pipeline execution summary
-    ---------------------------
-    Completed at: ${workflow.complete}
-    Duration    : ${workflow.duration}
-    Success     : ${workflow.success}
-    workDir     : ${workflow.workDir}
-    exit status : ${workflow.exitStatus}
-    Error report: ${workflow.errorReport ?: '-'}
-    """
+Pipeline execution summary
+---------------------------
+Completed at: ${workflow.complete}
+Duration    : ${workflow.duration}
+Success     : ${workflow.success}
+workDir     : ${workflow.workDir}
+exit status : ${workflow.exitStatus}
+Error report: ${workflow.errorReport ?: '-'}
+"""
 }
