@@ -77,7 +77,5 @@ cbc2c821e5c1cea84771446f1e48c57e *data/all.A.exc.tsv
 d079a559fc31561e625d8a6032e97e66 *data/all.A.psi5.tsv
 4569c6d8eaf78d750df5c7b2cc62b1fe *data/all.A.psit.tsv
 3a4b9a7bf23c0806a2f024157123839e *data/all.A.ret.tsv
-bd86b7e5a22bb838605e9ada3fb1ee7a *data/all.B.psicas.tsv
-bd86b7e5a22bb838605e9ada3fb1ee7a *data/all.B.psiloc.tsv
 2e3f45e2b7a9d5d3ca4378a2b2f5fd26 *data/all.counts.ssc.tsv
 1d6fa775fbf99767f84e4bd982601a63 *data/all.counts.ssj.tsv

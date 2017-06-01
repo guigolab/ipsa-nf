@@ -487,25 +487,6 @@ process zeta {
   """
 }
 
-process psicas {
-  
-  publishDir "${params.dir}/${endpoint}"
-
-  input:
-  file annotation from txIdxPsicas
-  set id, file(ssj) from ssj4psicasA06
-
-  output:
-  set id, file("${prefix}.gff") into B07
-
-  script:
-  endpoint = 'B07'
-  prefix = ssj.name.replace(/.tsv/,'').replace(/A06.ssj/, endpoint)
-  """
-  psicas.pl -ssj ${ssj} -annot ${annotation} -mincount ${params.mincount} > ${prefix}.gff 
-  """
-}
-
 process zetaMex {
   
   publishDir "${params.dir}/${endpoint}"
@@ -543,14 +524,6 @@ if ( params.microexons ) {
     }.set { A074merge }
 }
 
-B07.toSortedList { a,b -> a[0] <=> b[0] }
-  .map { list ->
-    ids = []
-    gffs = []
-    list.each { ids << it[0]; gffs << it[1] }
-    [ids, gffs]
-  }.set { B074merge }
-
 process mergeGFFzeta {
   publishDir "${params.dir}"
   
@@ -574,26 +547,6 @@ process mergeGFFzeta {
   prefix = "${params.merge}.A"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
   features = ['cosi', 'cosi3', 'cosi5', 'cosit', 'psi', 'psi3', 'psi5', 'psit', 'exc', 'inc', 'ret']
-  output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
-  percent = 0.25
-  transf = 'log'
-  template 'merge_gff.pl'
-}
-
-process mergeGFFpsicas {
-  publishDir "${params.dir}"
-  
-  input:
-  set ids, file(sscs) from B074merge
-
-  output:
-  file "${prefix}.psicas.tsv"
-  file "${prefix}.psiloc.tsv"
-
-  shell:
-  prefix = "${params.merge}.B"
-  input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  features = ['psicas', 'psiloc']
   output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
   percent = 0.25
   transf = 'log'
