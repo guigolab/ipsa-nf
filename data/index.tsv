@@ -1,4 +1,4 @@
-E14	E14_rep1	E14AlnRep1.sub.bam	bam	Alignments	Paired-End	MATE2_SENSE	101
-E14	E14_rep2	E14AlnRep2.sub.bam	bam	Alignments	Paired-End	MATE2_SENSE	101
-E18	E18_rep1	E18AlnRep1.sub.bam	bam	Alignments	Paired-End	MATE2_SENSE	101
-E18	E18_rep2	E18AlnRep2.sub.bam	bam	Alignments	Paired-End	MATE2_SENSE	101
+E14_rep1	E14AlnRep1.sub.bam	Paired-End	MATE2_SENSE
+E14_rep2	E14AlnRep2.sub.bam	Paired-End	MATE2_SENSE
+E18_rep1	E18AlnRep1.sub.bam	Paired-End	MATE2_SENSE
+E18_rep2	E18AlnRep2.sub.bam	Paired-End	MATE2_SENSE

@@ -126,10 +126,10 @@ Channel
 
 process preprocBams {
   input:
-  set sample, id, file(bam), type, view, readType, readStrand from bams
+  set id, file(bam), readType, readStrand from bams
 
   output:
-  set sample, id, file(bam), type, view, readType, readStrand, stdout into bamsWreadLength
+  set id, file(bam), readType, readStrand, stdout into bamsWreadLength
 
   script:
   prefix = bam.name.replace(/.bam/,'')
@@ -143,7 +143,7 @@ process sjcount {
   publishDir "${params.dir}/${endpoint}"
 
   input:
-  set sample, id, file(bam), type, view, readType, readStrand, readLength from bamsWreadLength
+  set id, file(bam), readType, readStrand, readLength from bamsWreadLength
 
   output:
   set id, file("${prefix}.ssc.tsv"), readLength into A01ssc
