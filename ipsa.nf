@@ -100,7 +100,7 @@ log.info "Entropy lowewr threshold           : ${params.entropy}"
 log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
 
-if (params.genome =~ /.fa$/) {
+if (params.genome =~ /.fa(sta)?$/) {
   process genomeIndex {
     input:
     file genome from file(params.genome)
