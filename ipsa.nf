@@ -103,15 +103,15 @@ log.info ""
 if (params.genome =~ /.fa(sta)?$/) {
   process genomeIndex {
     input:
-    file genome from file(params.genome)
+    file("genome.fa") from genomeChan
 
     output:
     set file("${prefix}.dbx"), file("${prefix}.idx") into genomeIdx
     
     script:
-    prefix = genome.name.replace(/.fa/, '')
+    prefix = file(params.genome).name.replaceAll(/.fa(sta)?$/, '')
     """
-    transf -dir ./${genome} -dbx ${prefix}.dbx -idx ${prefix}.idx -exactdir
+    transf -dir ./genome.fa -dbx ${prefix}.dbx -idx ${prefix}.idx -exactdir
     """
   }
 } else {
