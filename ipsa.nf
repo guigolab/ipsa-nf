@@ -101,6 +101,13 @@ log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
 
 if (params.genome =~ /.fa(sta)?$/) {
+
+  Channel
+    .value( file(params.genome) )
+    .filter { it.exists() }
+    .ifEmpty { exit "Cannot find genome: ${params.genome}" }
+    .set { genomeChan }
+
   process genomeIndex {
     input:
     file("genome.fa") from genomeChan
@@ -116,6 +123,10 @@ if (params.genome =~ /.fa(sta)?$/) {
   }
 } else {
   Channel.value([file("${params.genome}.dbx"), file("${params.genome}.idx")])
+    .filter { idx, dbx ->
+      idx.exists() && dbx.exists()
+    }
+    .ifEmpty { exit "Cannot find genome prefix: ${params.genome}" }
     .set{ genomeIdx }
 }
 
