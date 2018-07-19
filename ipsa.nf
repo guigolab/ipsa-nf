@@ -29,7 +29,7 @@ import IPSA
 params.index = "${baseDir}/data/index.tsv"
 params.genome = "${baseDir}/data/genome.fa"
 params.annot = "${baseDir}/data/annotation.gtf"
-
+params.features = 'cosi, cosi3, cosi5, cosit, psi, psi3, psi5, psit, exc, inc, ret'
 
 // parameters
 params.merge = "all"
@@ -87,6 +87,7 @@ log.info "Index file                         : ${params.index}"
 log.info "Genome                             : ${params.genome}"
 log.info "Annotation                         : ${params.annot}"
 log.info "Merge output name                  : ${params.merge}"
+log.info "Merged features                    : ${params.features}"
 log.info "Output dir                         : ${params.dir}"
 log.info "Sjcount parameters                 : ${params.sjcountParams ?: '-'}"
 log.info "Include microexons                 : ${params.microexons}"
@@ -99,6 +100,9 @@ log.info "Splice sites distance threshold    : ${params.deltaSS}"
 log.info "Entropy lowewr threshold           : ${params.entropy}"
 log.info "Annotation status lower threshold  : ${params.status}"
 log.info ""
+
+// Tokenize features parameter
+features = params.features.tokenize(/, ?/)
 
 if (params.genome =~ /.fa(sta)?$/) {
 
@@ -539,26 +543,16 @@ process mergeGFFzeta {
   publishDir "${params.dir}"
   
   input:
+  each feature from features
   set ids, file(sscs) from A074merge
 
   output:
-  file "${prefix}.psi.tsv"
-  file "${prefix}.psi3.tsv"
-  file "${prefix}.psi5.tsv"
-  file "${prefix}.psit.tsv"
-  file "${prefix}.cosi.tsv"
-  file "${prefix}.cosi3.tsv"
-  file "${prefix}.cosi5.tsv"
-  file "${prefix}.cosit.tsv"
-  file "${prefix}.exc.tsv"
-  file "${prefix}.inc.tsv"
-  file "${prefix}.ret.tsv"
+  file "${prefix}.tsv"
 
   shell:
-  prefix = "${params.merge}.A"
+  prefix = "${params.merge}.A.${feature}"
   input = [sscs.toList(), ids].transpose().flatten().collect { "'$it'" }.join(',')
-  features = ['cosi', 'cosi3', 'cosi5', 'cosit', 'psi', 'psi3', 'psi5', 'psit', 'exc', 'inc', 'ret']
-  output = features.collect { "'${it}', '${prefix}.${it}.tsv'" }.join(',')
+  output = "'${feature}', '${prefix}.tsv'"
   percent = 0.25
   transf = 'log'
   template 'merge_gff.pl'
